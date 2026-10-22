@@ -1,8 +1,9 @@
-.PHONY: build build-all test lint clean sdk-test sdk-run
+.PHONY: build build-all test lint clean conformance trace-map sdk-test sdk-run
 
 BINARY_NAME := epack-collector-tls
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
 COMMIT := $(shell git rev-parse --verify HEAD 2>/dev/null || echo "unknown")
+EPACK_VERSION = $(shell go list -m -f '{{.Version}}' github.com/locktivity/epack)
 
 build:
 	go build -ldflags "-X 'main.Version=$(VERSION)' -X 'main.Commit=$(COMMIT)'" -o $(BINARY_NAME) ./cmd/epack-collector-tls
@@ -27,6 +28,16 @@ lint: $(GOLANGCI_LINT)
 
 clean:
 	rm -f $(BINARY_NAME) $(BINARY_NAME)-*
+
+# Conformance at the epack version go.mod pins, as CI runs it.
+conformance: build
+	go run -tags conformance github.com/locktivity/epack/cmd/epack-conformance@$(EPACK_VERSION) collector ./$(BINARY_NAME) --level standard \
+		$(if $(wildcard testdata/conformance.json),--config testdata/conformance.json)
+
+# Rewrites docs/schema/trace-map.json from the collectortest suites and the
+# source, at the epack version go.mod pins, as CI checks it. Commit the result.
+trace-map:
+	go run -tags components github.com/locktivity/epack/cmd/epack@$(EPACK_VERSION) sdk map
 
 sdk-test: build
 	epack sdk test ./$(BINARY_NAME)

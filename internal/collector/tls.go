@@ -6,10 +6,14 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net"
 	"strings"
+	"syscall"
 	"time"
+
+	"github.com/locktivity/epack/componentsdk"
 )
 
 const expiringSoonDays = 30
@@ -19,48 +23,165 @@ const expiringSoonDays = 30
 // probing as unsupported.
 var probeCipherSuites = allCipherSuiteIDs()
 
-func ScanEndpoint(ctx context.Context, endpoint Endpoint, timeout time.Duration) EndpointResult {
-	result := EndpointResult{
-		Host:   endpoint.Host,
-		Port:   endpoint.Port,
-		Errors: []string{},
-	}
-	now := time.Now().UTC()
+const handshakeOperation = "tls.handshake"
 
-	state, err := handshake(ctx, endpoint, tls.VersionTLS12, 0, timeout)
-	if err != nil {
-		result.Errors = append(result.Errors, "TLS handshake failed: "+err.Error())
-		result.TLS = &TLSDetails{ProtocolSupport: probeProtocols(ctx, endpoint, 0, timeout)}
-		result.Assessment = assess(result, now)
-		return result
-	}
-
-	result.Reachable = true
-	result.TLS = &TLSDetails{
-		NegotiatedVersion:     tlsVersionName(state.Version),
-		NegotiatedCipherSuite: tls.CipherSuiteName(state.CipherSuite),
-		ProtocolSupport:       probeProtocols(ctx, endpoint, state.Version, timeout),
-	}
-	if len(state.PeerCertificates) > 0 {
-		result.Certificate = summarizeCertificate(endpoint.Host, state.PeerCertificates, now)
-	}
-	result.Assessment = assess(result, now)
-	return result
+var probes = []struct {
+	version   uint16
+	operation string
+	field     string
+}{
+	{tls.VersionTLS10, "tls.probe.tls10", "tls_1_0"},
+	{tls.VersionTLS11, "tls.probe.tls11", "tls_1_1"},
+	{tls.VersionTLS12, "tls.probe.tls12", "tls_1_2"},
+	{tls.VersionTLS13, "tls.probe.tls13", "tls_1_3"},
 }
 
-func handshake(ctx context.Context, endpoint Endpoint, minVersion uint16, maxVersion uint16, timeout time.Duration) (tls.ConnectionState, error) {
-	handshakeCtx, cancel := context.WithTimeout(ctx, timeout)
+// gap is a value left out of an endpoint's result, by its pointer within the
+// result, and the error that kept it out.
+type gap struct {
+	pointer string
+	err     error
+}
+
+type scanner struct {
+	dial     func(ctx context.Context, network, address string) (net.Conn, error)
+	roots    *x509.CertPool
+	timeout  time.Duration
+	progress func(current, total int64, message string)
+}
+
+// endpointScan is one endpoint's result as the run's steps fill it in, with
+// the values left out of it so far.
+type endpointScan struct {
+	index    int
+	endpoint Endpoint
+	now      time.Time
+	rec      *componentsdk.Recorder
+	result   EndpointResult
+	gaps     []gap
+	// negotiated is the version the modern handshake settled on, which needs
+	// no probe of its own.
+	negotiated uint16
+	// unreachable is set when the endpoint answered the modern handshake with
+	// a refused connection or a name that does not exist. It accepts no TLS
+	// version, so no probe runs.
+	unreachable          bool
+	legacyErr, modernErr error
+}
+
+func newEndpointScan(index int, endpoint Endpoint, rec *componentsdk.Recorder) endpointScan {
+	return endpointScan{
+		index:    index,
+		endpoint: endpoint,
+		rec:      rec,
+		result:   EndpointResult{Host: endpoint.Host, Port: endpoint.Port, TLS: &TLSDetails{}},
+	}
+}
+
+// leaveOut records a gap for each value err kept out of the endpoint's
+// result, by its pointer within the result.
+func (e *endpointScan) leaveOut(err error, pointers ...string) {
+	e.rec.Helper()
+	for _, pointer := range pointers {
+		e.rec.NotCollected(location(fmt.Sprintf("/endpoints/%d%s", e.index, pointer)), err)
+		e.gaps = append(e.gaps, gap{pointer: pointer, err: err})
+	}
+}
+
+// connect makes the modern handshake, judging the certificate at e.now. An
+// endpoint that turns the handshake down, with a TLS alert or a reply that is
+// not TLS, has answered, and so has one whose name does not exist or whose
+// port refuses the connection. A timeout, a reset, or any other failure
+// leaves out the values that depended on the handshake, each with a gap.
+func (s scanner) connect(ctx context.Context, e *endpointScan) {
+	result := &e.result
+	state, err := s.handshake(ctx, e.endpoint, handshakeOperation, tls.VersionTLS12, 0)
+	switch {
+	case err == nil:
+		e.negotiated = state.Version
+		result.Reachable = ptr(true)
+		result.TLS.NegotiatedVersion = tlsVersionName(state.Version)
+		result.TLS.NegotiatedCipherSuite = tls.CipherSuiteName(state.CipherSuite)
+		if len(state.PeerCertificates) > 0 {
+			result.Certificate = summarizeCertificate(e.endpoint.Host, state.PeerCertificates, s.roots, e.now)
+		}
+	case unreachable(err):
+		e.unreachable = true
+		result.Reachable = ptr(false)
+		result.Errors = append(result.Errors, "TLS handshake failed: "+err.Error())
+		result.TLS.ProtocolSupport = ProtocolSupport{TLS10: ptr(false), TLS11: ptr(false), TLS12: ptr(false), TLS13: ptr(false)}
+	case turnedDown(err):
+		result.Reachable = ptr(false)
+		result.Errors = append(result.Errors, "TLS handshake failed: "+err.Error())
+	default:
+		result.Errors = append(result.Errors, "TLS handshake failed: "+err.Error())
+		e.leaveOut(err, "/reachable", "/tls/negotiated_version", "/tls/negotiated_cipher_suite", "/certificate",
+			"/assessment/certificate_valid", "/assessment/hostname_valid", "/assessment/expired", "/assessment/expiring_soon")
+	}
+}
+
+// probe tries each TLS version the modern handshake did not settle on, one
+// handshake per version. A version the endpoint turns down reads as false,
+// and a probe that fails another way leaves the version out with a gap.
+func (s scanner) probe(ctx context.Context, e *endpointScan) {
+	if e.unreachable {
+		return
+	}
+	support := &e.result.TLS.ProtocolSupport
+	for _, p := range probes {
+		if p.version == e.negotiated {
+			support.set(p.version, ptr(true))
+			continue
+		}
+		_, err := s.handshake(ctx, e.endpoint, p.operation, p.version, p.version)
+		switch {
+		case err == nil:
+			support.set(p.version, ptr(true))
+		case turnedDown(err):
+			support.set(p.version, ptr(false))
+		default:
+			e.result.Errors = append(e.result.Errors, tlsVersionName(p.version)+" probe failed: "+err.Error())
+			e.leaveOut(err, "/tls/protocol_support/"+p.field)
+			switch {
+			case p.version <= tls.VersionTLS11 && e.legacyErr == nil:
+				e.legacyErr = err
+			case p.version >= tls.VersionTLS12 && e.modernErr == nil:
+				e.modernErr = err
+			}
+		}
+	}
+}
+
+// assess judges the endpoint from what the steps read, and leaves out each
+// protocol judgment a failed probe left unknown.
+func (e *endpointScan) assess() {
+	e.result.Assessment = assess(e.result, e.now)
+	if e.result.Assessment.ModernProtocol == nil {
+		e.leaveOut(e.modernErr, "/assessment/modern_protocol")
+	}
+	if e.result.Assessment.LegacyProtocolSupported == nil {
+		e.leaveOut(e.legacyErr, "/assessment/legacy_protocol_supported")
+	}
+}
+
+func (s scanner) handshake(ctx context.Context, endpoint Endpoint, operation string, minVersion uint16, maxVersion uint16) (*tls.ConnectionState, error) {
+	deadline := time.Now().Add(s.timeout)
+	dialCtx, cancel := context.WithDeadline(ctx, deadline)
 	defer cancel()
+	dialCtx = componentsdk.WithOperation(dialCtx, componentsdk.Operation{Name: operation})
 
 	address := net.JoinHostPort(endpoint.Host, fmt.Sprintf("%d", endpoint.Port))
-	dialer := &net.Dialer{Timeout: timeout}
-	rawConn, err := dialer.DialContext(handshakeCtx, "tcp", address)
+	rawConn, err := s.dial(dialCtx, "tcp", address)
 	if err != nil {
-		return tls.ConnectionState{}, err
+		return nil, err
 	}
 	defer func() { _ = rawConn.Close() }()
+	// The connection's deadline bounds the handshake, so a timeout fails a read
+	// that the dialer counts against the operation. A context that expired
+	// would close the connection instead, which reads as the collector's own
+	// close and goes uncounted.
+	_ = rawConn.SetDeadline(deadline)
 
-	_ = rawConn.SetDeadline(time.Now().Add(timeout))
 	// #nosec G402 -- verification is performed manually so invalid certificates can be reported as evidence.
 	tlsConn := tls.Client(rawConn, &tls.Config{
 		ServerName:         endpoint.Host,
@@ -69,31 +190,42 @@ func handshake(ctx context.Context, endpoint Endpoint, minVersion uint16, maxVer
 		CipherSuites:       probeCipherSuites,
 		InsecureSkipVerify: true,
 	})
-	if err := tlsConn.HandshakeContext(handshakeCtx); err != nil {
-		return tls.ConnectionState{}, err
+	if err := tlsConn.HandshakeContext(ctx); err != nil {
+		return nil, err
 	}
-	return tlsConn.ConnectionState(), nil
+	state := tlsConn.ConnectionState()
+	return &state, nil
 }
 
-func probeProtocols(ctx context.Context, endpoint Endpoint, negotiated uint16, timeout time.Duration) ProtocolSupport {
-	support := ProtocolSupport{
-		TLS12: negotiated == tls.VersionTLS12,
-		TLS13: negotiated == tls.VersionTLS13,
-	}
-	support.TLS10 = probeProtocol(ctx, endpoint, tls.VersionTLS10, timeout)
-	support.TLS11 = probeProtocol(ctx, endpoint, tls.VersionTLS11, timeout)
-	if !support.TLS12 {
-		support.TLS12 = probeProtocol(ctx, endpoint, tls.VersionTLS12, timeout)
-	}
-	if !support.TLS13 {
-		support.TLS13 = probeProtocol(ctx, endpoint, tls.VersionTLS13, timeout)
-	}
-	return support
+// unreachable reports whether a dial failed with an answer: the host's name
+// does not exist, or nothing listens on the port.
+func unreachable(err error) bool {
+	var dnsErr *net.DNSError
+	return errors.Is(err, syscall.ECONNREFUSED) || (errors.As(err, &dnsErr) && dnsErr.IsNotFound)
 }
 
-func probeProtocol(ctx context.Context, endpoint Endpoint, version uint16, timeout time.Duration) bool {
-	_, err := handshake(ctx, endpoint, version, version, timeout)
-	return err == nil
+// turnedDown reports whether the endpoint answered a handshake by turning it
+// down: with a TLS alert, or with a reply that is not TLS at all.
+func turnedDown(err error) bool {
+	var opErr *net.OpError
+	if errors.As(err, &opErr) && opErr.Op == "remote error" {
+		return true
+	}
+	var header tls.RecordHeaderError
+	return errors.As(err, &header)
+}
+
+func (p *ProtocolSupport) set(version uint16, supported *bool) {
+	switch version {
+	case tls.VersionTLS10:
+		p.TLS10 = supported
+	case tls.VersionTLS11:
+		p.TLS11 = supported
+	case tls.VersionTLS12:
+		p.TLS12 = supported
+	case tls.VersionTLS13:
+		p.TLS13 = supported
+	}
 }
 
 func allCipherSuiteIDs() []uint16 {
@@ -107,7 +239,7 @@ func allCipherSuiteIDs() []uint16 {
 	return ids
 }
 
-func summarizeCertificate(host string, chain []*x509.Certificate, now time.Time) *Certificate {
+func summarizeCertificate(host string, chain []*x509.Certificate, roots *x509.CertPool, now time.Time) *Certificate {
 	leaf := chain[0]
 	cert := &Certificate{
 		SubjectCommonName:  leaf.Subject.CommonName,
@@ -116,7 +248,7 @@ func summarizeCertificate(host string, chain []*x509.Certificate, now time.Time)
 		NotBefore:          leaf.NotBefore,
 		NotAfter:           leaf.NotAfter,
 		ExpiresInDays:      int(leaf.NotAfter.Sub(now).Hours() / 24),
-		DNSNames:           leaf.DNSNames,
+		DNSNames:           append([]string{}, leaf.DNSNames...),
 		IPAddresses:        ipStrings(leaf.IPAddresses),
 		FingerprintSHA256:  fingerprintSHA256(leaf.Raw),
 		SignatureAlgorithm: leaf.SignatureAlgorithm.String(),
@@ -124,44 +256,63 @@ func summarizeCertificate(host string, chain []*x509.Certificate, now time.Time)
 		ChainLength:        len(chain),
 		HostnameValid:      leaf.VerifyHostname(host) == nil,
 	}
-	cert.TrustedChain = verifyChain(host, chain, now) == nil
+	cert.TrustedChain = verifyChain(chain, roots, now) == nil
 	return cert
 }
 
-func verifyChain(host string, chain []*x509.Certificate, now time.Time) error {
-	if len(chain) == 0 {
-		return fmt.Errorf("no certificates")
-	}
+// verifyChain checks that the chain leads to a trusted root. The hostname and
+// the leaf's validity window are reported on their own, so the chain is judged
+// without the hostname and at a moment inside the leaf's window: an expired
+// certificate from a trusted CA reads as expired, not as untrusted.
+func verifyChain(chain []*x509.Certificate, roots *x509.CertPool, now time.Time) error {
 	intermediates := x509.NewCertPool()
 	for _, cert := range chain[1:] {
 		intermediates.AddCert(cert)
 	}
-	_, err := chain[0].Verify(x509.VerifyOptions{
-		DNSName:       host,
-		CurrentTime:   now,
+	leaf := chain[0]
+	at := now
+	if at.After(leaf.NotAfter) {
+		at = leaf.NotAfter
+	}
+	if at.Before(leaf.NotBefore) {
+		at = leaf.NotBefore
+	}
+	_, err := leaf.Verify(x509.VerifyOptions{
+		Roots:         roots,
 		Intermediates: intermediates,
+		CurrentTime:   at,
 	})
 	return err
 }
 
+// assess judges an endpoint from what was read. A value whose basis was left
+// out is left out too.
 func assess(result EndpointResult, now time.Time) Assessment {
 	assessment := Assessment{}
-	var issues []string
+	issues := []string{}
 
-	if !result.Reachable {
+	if result.Reachable != nil && !*result.Reachable {
 		issues = append(issues, "Endpoint was not reachable over modern TLS")
 	}
 
-	if result.Certificate == nil {
+	switch {
+	case result.Reachable == nil:
+	case result.Certificate == nil:
 		issues = append(issues, "No certificate was presented")
-	} else {
+		assessment.CertificateValid = ptr(false)
+		assessment.HostnameValid = ptr(false)
+		assessment.Expired = ptr(false)
+		assessment.ExpiringSoon = ptr(false)
+	default:
 		certificate := *result.Certificate
 		notYetValid := certificate.NotBefore.After(now)
-		assessment.HostnameValid = certificate.HostnameValid
-		assessment.Expired = certificateExpired(certificate, now)
-		assessment.ExpiringSoon = !assessment.Expired && certificate.ExpiresInDays <= expiringSoonDays
-		assessment.CertificateValid = certificate.TrustedChain && certificate.HostnameValid &&
-			!assessment.Expired && !notYetValid
+		expired := certificateExpired(certificate, now)
+		expiringSoon := !expired && certificate.ExpiresInDays <= expiringSoonDays
+		assessment.HostnameValid = ptr(certificate.HostnameValid)
+		assessment.Expired = ptr(expired)
+		assessment.ExpiringSoon = ptr(expiringSoon)
+		assessment.CertificateValid = ptr(certificate.TrustedChain && certificate.HostnameValid &&
+			!expired && !notYetValid)
 
 		if !certificate.TrustedChain {
 			issues = append(issues, "Certificate chain is not trusted")
@@ -172,29 +323,38 @@ func assess(result EndpointResult, now time.Time) Assessment {
 		if notYetValid {
 			issues = append(issues, "Certificate is not yet valid")
 		}
-		if assessment.Expired {
+		if expired {
 			issues = append(issues, "Certificate is expired")
-		} else if assessment.ExpiringSoon {
+		} else if expiringSoon {
 			issues = append(issues, "Certificate expires within 30 days")
 		}
 	}
 
-	if result.TLS == nil {
-		issues = append(issues, "TLS protocol support was not checked")
-	} else {
-		support := result.TLS.ProtocolSupport
-		assessment.ModernProtocol = support.TLS12 || support.TLS13
-		assessment.LegacyProtocolSupported = support.TLS10 || support.TLS11
-		if !assessment.ModernProtocol {
-			issues = append(issues, "TLS 1.2 or TLS 1.3 support was not detected")
-		}
-		if assessment.LegacyProtocolSupported {
-			issues = append(issues, "TLS 1.0 or TLS 1.1 is supported")
-		}
+	support := result.TLS.ProtocolSupport
+	assessment.ModernProtocol = either(support.TLS12, support.TLS13)
+	assessment.LegacyProtocolSupported = either(support.TLS10, support.TLS11)
+	if assessment.ModernProtocol != nil && !*assessment.ModernProtocol {
+		issues = append(issues, "TLS 1.2 or TLS 1.3 support was not detected")
+	}
+	if assessment.LegacyProtocolSupported != nil && *assessment.LegacyProtocolSupported {
+		issues = append(issues, "TLS 1.0 or TLS 1.1 is supported")
 	}
 
 	assessment.Issues = issues
 	return assessment
+}
+
+// either is true when a or b is true, false when both are false, and unknown
+// otherwise.
+func either(a, b *bool) *bool {
+	switch {
+	case (a != nil && *a) || (b != nil && *b):
+		return ptr(true)
+	case a != nil && b != nil:
+		return ptr(false)
+	default:
+		return nil
+	}
 }
 
 func certificateExpired(cert Certificate, now time.Time) bool {

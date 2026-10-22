@@ -37,18 +37,24 @@ The collector only connects to endpoints you explicitly configure. There is no d
 ## How It Works
 
 1. The collector receives a list of endpoints from your configuration
-2. For each endpoint, it performs a TLS 1.2+ handshake and records the negotiated version, cipher suite, and certificate chain
-3. It probes each remaining TLS version individually to build the protocol support matrix
-4. The certificate chain is verified against system roots and the configured hostname
+2. In its first step, `handshake`, it performs a TLS 1.2+ handshake with each endpoint and records the negotiated version, cipher suite, and certificate chain
+3. In its second step, `protocol_support`, it probes each endpoint's remaining TLS versions individually to build the protocol support matrix
+4. The certificate chain is verified against system roots, and the hostname match and validity window are checked on their own
 5. Per-endpoint assessment is computed (certificate validity, protocol posture, issues)
-6. Summary statistics are aggregated across all configured endpoints
+6. Summary counts and percentages are aggregated across all configured endpoints
 7. Output is wrapped in the epack collector protocol envelope
 
 Certificate verification happens after the handshake, so invalid, expired, or mismatched certificates are reported as evidence rather than causing collection to fail.
 
-Probes offer every cipher suite Go implements, including legacy suites excluded from modern client defaults, so servers that only speak old cipher suites are still detected. A `false` protocol support value means no handshake succeeded at that version with any implemented suite.
+An expired certificate or one for another hostname still reads `trusted_chain: true` when it chains to a trusted root; `expired` and `hostname_valid` report those problems.
 
-Summary percentages use all configured endpoints as the denominator. An unreachable endpoint counts against `certificate_valid_pct` and `modern_protocol_pct`, since its posture could not be demonstrated.
+Probes offer every cipher suite Go implements, including legacy suites excluded from modern client defaults, so servers that only speak old cipher suites are still detected. A `false` protocol support value means the endpoint turned that version down, with a TLS alert or a reply that is not TLS, or that nothing accepted the connection. A probe that times out or fails another way leaves its value out instead.
+
+Summary percentages use all configured endpoints as the denominator. An endpoint that answered without completing a modern handshake, such as one that refuses the connection or speaks plain HTTP, counts against `certificate_valid_pct` and `modern_protocol_pct`. Each percentage has the count it is taken of beside it, such as `certificate_valid_count`, and is that count over `total_endpoints`, rounded down.
+
+## Partial Collection
+
+A value the collector could not read is left out of `artifacts/tls.json` rather than written as `false` or 0, and a summary count and percentage over it are left out too. The collector result artifact, `artifacts/tls.collector-result.json`, records a gap for each value left out, with the reason and the handshake or probe that failed. It also lists the connections the collector made and the run's two steps. The run fails only when the configuration is invalid.
 
 ## Authentication
 
