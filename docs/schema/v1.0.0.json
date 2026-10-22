@@ -2,277 +2,372 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "evidencepack/tls@v1",
   "title": "TLS posture",
+  "description": "Certificate and protocol posture of the endpoints the collector is configured to check. A value the collector could not read is left out, and the run's collector result records a gap for it with the reason.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "collected_at", "endpoints", "summary"],
+  "required": ["schema_version", "collected_at", "endpoints"],
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "1.0.0"
+      "const": "1.0.0",
+      "description": "Version of this artifact's schema."
     },
     "collected_at": {
       "type": "string",
-      "format": "date-time"
+      "format": "date-time",
+      "description": "When the run started collecting, in UTC."
     },
     "endpoints": {
       "type": "array",
       "items": {
         "$ref": "#/$defs/endpoint_result"
-      }
+      },
+      "description": "One row per configured endpoint, in the order the configuration lists them."
     },
     "summary": {
-      "$ref": "#/$defs/summary"
+      "$ref": "#/$defs/summary",
+      "description": "Counts and percentages over every configured endpoint."
     },
     "diagnostics": {
-      "$ref": "#/$defs/diagnostics"
+      "$ref": "#/$defs/diagnostics",
+      "description": "Every endpoint's error text in one list. Absent when no endpoint has any."
     }
   },
   "$defs": {
     "endpoint_result": {
       "type": "object",
+      "description": "One configured endpoint and what its handshakes showed. The modern handshake offers TLS 1.2 and TLS 1.3, and each probe offers a single version.",
       "additionalProperties": false,
-      "required": ["host", "port", "reachable", "assessment"],
+      "required": ["host", "port"],
       "properties": {
         "host": {
-          "type": "string"
+          "type": "string",
+          "description": "Host name or IP address, as configured, in lowercase and without a scheme or trailing dot. The certificate is checked against it, and a host name is sent as the server name (SNI) in each handshake."
         },
         "port": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 65535
+          "maximum": 65535,
+          "description": "TCP port, 443 unless the configuration names another."
         },
         "reachable": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the endpoint completed the modern handshake. False when it turned that handshake down with a TLS alert or a reply that is not TLS, refused the connection, or has a host name that does not exist. Left out, with a gap, when the modern handshake timed out, was reset, or failed another way."
         },
         "tls": {
-          "$ref": "#/$defs/tls_details"
+          "$ref": "#/$defs/tls_details",
+          "description": "The version and cipher suite the modern handshake settled on, and which TLS versions the endpoint accepts."
         },
         "certificate": {
-          "$ref": "#/$defs/certificate"
+          "$ref": "#/$defs/certificate",
+          "description": "The leaf certificate the endpoint presented in the modern handshake. Absent when the endpoint did not complete that handshake: it turned it down, refused the connection, or has a host name that does not exist. Left out, with a gap, when the modern handshake timed out, was reset, or failed another way."
         },
         "assessment": {
-          "$ref": "#/$defs/assessment"
+          "$ref": "#/$defs/assessment",
+          "description": "Judgments of the endpoint drawn from its handshakes and its certificate."
         },
         "errors": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "Error text of the modern handshake when the endpoint did not complete it, and of each probe that failed. A probe the endpoint turned down adds none. Absent when there is none."
         }
       }
     },
     "tls_details": {
-      "type": "object",
+      "type": ["object", "null"],
+      "description": "What the handshakes showed about the endpoint's TLS versions.",
       "additionalProperties": false,
-      "required": ["protocol_support"],
       "properties": {
         "negotiated_version": {
-          "type": "string"
+          "type": "string",
+          "description": "TLS version the modern handshake settled on, such as TLS 1.3. Absent when the endpoint did not complete that handshake, and left out, with a gap, when the handshake failed."
         },
         "negotiated_cipher_suite": {
-          "type": "string"
+          "type": "string",
+          "description": "Cipher suite the modern handshake settled on, by its standard name, such as TLS_AES_128_GCM_SHA256. Absent when the endpoint did not complete that handshake, and left out, with a gap, when the handshake failed."
         },
         "protocol_support": {
-          "$ref": "#/$defs/protocol_support"
+          "$ref": "#/$defs/protocol_support",
+          "description": "Whether the endpoint accepts each TLS version."
         }
       }
     },
     "protocol_support": {
-      "type": "object",
+      "type": ["object", "null"],
+      "description": "Which TLS versions the endpoint accepts. Each version the modern handshake did not settle on is probed with a handshake that offers only that version and every cipher suite Go implements, legacy ones included.",
       "additionalProperties": false,
-      "required": ["tls_1_0", "tls_1_1", "tls_1_2", "tls_1_3"],
       "properties": {
         "tls_1_0": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the endpoint accepts TLS 1.0: the modern handshake settled on it, or a handshake that offered only TLS 1.0 completed. False when the endpoint turned that handshake down with a TLS alert or a reply that is not TLS, or when it refused the modern handshake's connection or has a host name that does not exist. Left out, with a gap, when the probe timed out, was reset, or failed another way."
         },
         "tls_1_1": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the endpoint accepts TLS 1.1: the modern handshake settled on it, or a handshake that offered only TLS 1.1 completed. False when the endpoint turned that handshake down with a TLS alert or a reply that is not TLS, or when it refused the modern handshake's connection or has a host name that does not exist. Left out, with a gap, when the probe timed out, was reset, or failed another way."
         },
         "tls_1_2": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the endpoint accepts TLS 1.2: the modern handshake settled on it, or a handshake that offered only TLS 1.2 completed. False when the endpoint turned that handshake down with a TLS alert or a reply that is not TLS, or when it refused the modern handshake's connection or has a host name that does not exist. Left out, with a gap, when the probe timed out, was reset, or failed another way."
         },
         "tls_1_3": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the endpoint accepts TLS 1.3: the modern handshake settled on it, or a handshake that offered only TLS 1.3 completed. False when the endpoint turned that handshake down with a TLS alert or a reply that is not TLS, or when it refused the modern handshake's connection or has a host name that does not exist. Left out, with a gap, when the probe timed out, was reset, or failed another way."
         }
       }
     },
     "certificate": {
-      "type": "object",
+      "type": ["object", "null"],
+      "description": "The leaf certificate from the modern handshake. The collector checks the chain itself after the handshake, so an untrusted, expired, or mismatched certificate is reported rather than failing the handshake.",
       "additionalProperties": false,
-      "required": [
-        "not_before",
-        "not_after",
-        "expires_in_days",
-        "fingerprint_sha256",
-        "chain_length",
-        "trusted_chain",
-        "hostname_valid"
-      ],
+      "required": ["not_before", "not_after", "fingerprint_sha256"],
       "properties": {
         "subject_common_name": {
-          "type": "string"
+          "type": "string",
+          "description": "Common name in the certificate's subject. Absent when the subject has none."
         },
         "issuer_common_name": {
-          "type": "string"
+          "type": "string",
+          "description": "Common name in the certificate's issuer. Absent when the issuer has none."
         },
         "serial_number": {
-          "type": "string"
+          "type": "string",
+          "description": "Serial number, in decimal."
         },
         "not_before": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "Start of the certificate's validity window."
         },
         "not_after": {
           "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "description": "End of the certificate's validity window."
         },
         "expires_in_days": {
-          "type": "integer"
+          "type": ["integer", "null"],
+          "description": "Whole days from the check until not_after, rounded toward zero, so it turns negative once the certificate has been expired for a full day."
         },
         "dns_names": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "DNS names among the certificate's subject alternative names."
         },
         "ip_addresses": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "IP addresses among the certificate's subject alternative names."
         },
         "fingerprint_sha256": {
           "type": "string",
-          "pattern": "^[A-F0-9]{64}$"
+          "pattern": "^[A-F0-9]{64}$",
+          "description": "SHA-256 digest of the certificate's DER encoding, in uppercase hex."
         },
         "signature_algorithm": {
-          "type": "string"
+          "type": "string",
+          "description": "Algorithm the issuer signed the certificate with, such as SHA256-RSA or ECDSA-SHA384."
         },
         "public_key_algorithm": {
-          "type": "string"
+          "type": "string",
+          "description": "Algorithm of the certificate's public key, such as RSA or ECDSA."
         },
         "chain_length": {
-          "type": "integer",
-          "minimum": 1
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Certificates the endpoint sent, the leaf included."
         },
         "trusted_chain": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the certificates the endpoint sent lead from the leaf to a trusted root. The chain is judged without the host name and at a moment inside the leaf's validity window, so a certificate from a trusted CA that has expired or names another host still reads true. The expired and hostname_valid judgments report those problems."
         },
         "hostname_valid": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the certificate is valid for host, by one of its subject alternative names."
         }
       }
     },
     "assessment": {
-      "type": "object",
+      "type": ["object", "null"],
+      "description": "Judgments of the endpoint drawn from what was read. A judgment whose basis was left out is left out too, with a gap.",
       "additionalProperties": false,
-      "required": [
-        "certificate_valid",
-        "hostname_valid",
-        "expired",
-        "expiring_soon",
-        "modern_protocol",
-        "legacy_protocol_supported"
-      ],
       "properties": {
         "certificate_valid": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the chain is trusted, the certificate is valid for host, and the check falls inside its validity window. False when the endpoint answered without presenting a certificate. Left out, with a gap, when the modern handshake timed out, was reset, or failed another way."
         },
         "hostname_valid": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "Whether the certificate is valid for host, as certificate.hostname_valid says. False when the endpoint answered without presenting a certificate. Left out, with a gap, when the modern handshake timed out, was reset, or failed another way."
         },
         "expired": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the check falls at or after not_after. False when the endpoint answered without presenting a certificate. Left out, with a gap, when the modern handshake timed out, was reset, or failed another way."
         },
         "expiring_soon": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the certificate has not expired and expires_in_days is 30 or less. False when the endpoint answered without presenting a certificate. Left out, with a gap, when the modern handshake timed out, was reset, or failed another way."
         },
         "modern_protocol": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the endpoint accepts TLS 1.2 or TLS 1.3, and false when it accepts neither. Left out, with a gap, while a failed probe leaves it unknown."
         },
         "legacy_protocol_supported": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "description": "True when the endpoint accepts TLS 1.0 or TLS 1.1, and false when it accepts neither. Left out, with a gap, while a failed probe leaves it unknown."
         },
         "issues": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "The problems found, in plain language, such as \"Certificate is expired\". Empty when there are none."
         }
       }
     },
     "summary": {
-      "type": "object",
+      "type": ["object", "null"],
+      "description": "Counts and percentages over every configured endpoint. Each percentage is its count over total_endpoints, rounded down. A count and its percentage are left out, with a partial gap, when the value they count was left out for any endpoint, and so is an all_ flag unless an endpoint that was read already makes it false.",
       "additionalProperties": false,
-      "required": [
-        "total_endpoints",
-        "reachable_pct",
-        "certificate_valid_pct",
-        "hostname_valid_pct",
-        "modern_protocol_pct",
-        "expiring_soon_pct",
-        "legacy_protocol_supported_pct",
-        "all_certificates_valid",
-        "all_modern_protocol"
-      ],
       "properties": {
         "total_endpoints": {
-          "type": "integer",
-          "minimum": 0
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "x-epack-rollup": {"rows": "/endpoints", "as": "count"},
+          "description": "Configured endpoints, each a row in endpoints."
+        },
+        "reachable_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/reachable", "as": "count"},
+          "description": "Endpoints that completed the modern handshake."
         },
         "reachable_pct": {
-          "type": "integer",
+          "type": ["integer", "null"],
           "minimum": 0,
-          "maximum": 100
+          "maximum": 100,
+          "x-epack-denominator": "total_endpoints",
+          "x-epack-numerator": "reachable_count",
+          "x-epack-rounding": "floor",
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/reachable", "as": "pct"},
+          "description": "Percentage of endpoints that completed the modern handshake."
+        },
+        "certificate_valid_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/certificate_valid", "as": "count"},
+          "description": "Endpoints whose certificate is valid: trusted, valid for the host, and inside its validity window."
         },
         "certificate_valid_pct": {
-          "type": "integer",
+          "type": ["integer", "null"],
           "minimum": 0,
-          "maximum": 100
+          "maximum": 100,
+          "x-epack-denominator": "total_endpoints",
+          "x-epack-numerator": "certificate_valid_count",
+          "x-epack-rounding": "floor",
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/certificate_valid", "as": "pct"},
+          "description": "Percentage of endpoints whose certificate is valid. An endpoint that presented no certificate counts against it."
+        },
+        "hostname_valid_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/hostname_valid", "as": "count"},
+          "description": "Endpoints whose certificate is valid for the host."
         },
         "hostname_valid_pct": {
-          "type": "integer",
+          "type": ["integer", "null"],
           "minimum": 0,
-          "maximum": 100
+          "maximum": 100,
+          "x-epack-denominator": "total_endpoints",
+          "x-epack-numerator": "hostname_valid_count",
+          "x-epack-rounding": "floor",
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/hostname_valid", "as": "pct"},
+          "description": "Percentage of endpoints whose certificate is valid for the host."
+        },
+        "modern_protocol_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/modern_protocol", "as": "count"},
+          "description": "Endpoints that accept TLS 1.2 or TLS 1.3."
         },
         "modern_protocol_pct": {
-          "type": "integer",
+          "type": ["integer", "null"],
           "minimum": 0,
-          "maximum": 100
+          "maximum": 100,
+          "x-epack-denominator": "total_endpoints",
+          "x-epack-numerator": "modern_protocol_count",
+          "x-epack-rounding": "floor",
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/modern_protocol", "as": "pct"},
+          "description": "Percentage of endpoints that accept TLS 1.2 or TLS 1.3."
+        },
+        "expiring_soon_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/expiring_soon", "as": "count"},
+          "description": "Endpoints whose certificate has not expired and expires within 30 days."
         },
         "expiring_soon_pct": {
-          "type": "integer",
+          "type": ["integer", "null"],
           "minimum": 0,
-          "maximum": 100
+          "maximum": 100,
+          "x-epack-denominator": "total_endpoints",
+          "x-epack-numerator": "expiring_soon_count",
+          "x-epack-rounding": "floor",
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/expiring_soon", "as": "pct"},
+          "description": "Percentage of endpoints whose certificate has not expired and expires within 30 days."
+        },
+        "legacy_protocol_supported_count": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/legacy_protocol_supported", "as": "count"},
+          "description": "Endpoints that accept TLS 1.0 or TLS 1.1."
         },
         "legacy_protocol_supported_pct": {
-          "type": "integer",
+          "type": ["integer", "null"],
           "minimum": 0,
-          "maximum": 100
+          "maximum": 100,
+          "x-epack-denominator": "total_endpoints",
+          "x-epack-numerator": "legacy_protocol_supported_count",
+          "x-epack-rounding": "floor",
+          "x-epack-rollup": {"rows": "/endpoints", "where": "/assessment/legacy_protocol_supported", "as": "pct"},
+          "description": "Percentage of endpoints that accept TLS 1.0 or TLS 1.1."
         },
         "all_certificates_valid": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "x-epack-denominator": "total_endpoints",
+          "x-epack-numerator": "certificate_valid_count",
+          "description": "True when every endpoint's certificate is valid."
         },
         "all_modern_protocol": {
-          "type": "boolean"
+          "type": ["boolean", "null"],
+          "x-epack-denominator": "total_endpoints",
+          "x-epack-numerator": "modern_protocol_count",
+          "description": "True when every endpoint accepts TLS 1.2 or TLS 1.3."
         }
       }
     },
     "diagnostics": {
       "type": "object",
+      "description": "Error text kept for troubleshooting. Absent when no endpoint has any.",
       "additionalProperties": false,
       "properties": {
         "endpoint_errors": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "Each entry of every endpoint's errors, as host:port followed by the error text."
         },
         "warnings": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "Not set by this version of the collector."
         }
       }
     }

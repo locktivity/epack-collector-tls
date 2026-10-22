@@ -9,7 +9,7 @@ stream: myorg/tls-posture
 
 collectors:
   tls:
-    source: locktivity/epack-collector-tls@^0.1
+    source: locktivity/epack-collector-tls@^0.2
     config:
       endpoints:
         - app.example.com
@@ -28,7 +28,7 @@ stream: myorg/tls-posture
 
 collectors:
   tls:
-    source: locktivity/epack-collector-tls@^0.1
+    source: locktivity/epack-collector-tls@^0.2
     config:
       endpoints:
         - app.example.com           # Primary web app
@@ -77,6 +77,7 @@ EPACK_COLLECTOR_CONFIG=config.json epack sdk run ./epack-collector-tls
           "not_after": "2026-09-28T23:59:59Z",
           "expires_in_days": 78,
           "dns_names": ["app.example.com"],
+          "ip_addresses": [],
           "fingerprint_sha256": "9F2A417C6B8E0D3F5A1B2C4D6E8F0A1B3C5D7E9F1A3B5C7D9E1F3A5B7C9D0E2F",
           "signature_algorithm": "ECDSA-SHA384",
           "public_key_algorithm": "ECDSA",
@@ -90,7 +91,8 @@ EPACK_COLLECTOR_CONFIG=config.json epack sdk run ./epack-collector-tls
           "expired": false,
           "expiring_soon": false,
           "modern_protocol": true,
-          "legacy_protocol_supported": false
+          "legacy_protocol_supported": false,
+          "issues": []
         }
       },
       {
@@ -115,6 +117,7 @@ EPACK_COLLECTOR_CONFIG=config.json epack sdk run ./epack-collector-tls
           "not_after": "2026-08-02T23:59:59Z",
           "expires_in_days": 21,
           "dns_names": ["api.example.com"],
+          "ip_addresses": [],
           "fingerprint_sha256": "1D4E7A0C3F6B9E2D5A8C1F4B7E0A3D6C9F2B5E8A1D4C7F0B3E6A9D2C5F8B1E4A",
           "signature_algorithm": "SHA256-RSA",
           "public_key_algorithm": "RSA",
@@ -137,11 +140,17 @@ EPACK_COLLECTOR_CONFIG=config.json epack sdk run ./epack-collector-tls
     ],
     "summary": {
       "total_endpoints": 2,
+      "reachable_count": 2,
       "reachable_pct": 100,
+      "certificate_valid_count": 2,
       "certificate_valid_pct": 100,
+      "hostname_valid_count": 2,
       "hostname_valid_pct": 100,
+      "modern_protocol_count": 2,
       "modern_protocol_pct": 100,
+      "expiring_soon_count": 1,
       "expiring_soon_pct": 50,
+      "legacy_protocol_supported_count": 0,
       "legacy_protocol_supported_pct": 0,
       "all_certificates_valid": true,
       "all_modern_protocol": true
@@ -168,7 +177,7 @@ Each endpoint includes an `assessment` object:
 
 ### Summary Metrics
 
-All percentages use configured endpoints as the denominator, so an unreachable endpoint counts against certificate and protocol percentages.
+All percentages use configured endpoints as the denominator, so an endpoint that answered without completing a modern handshake counts against certificate and protocol percentages. Each percentage has a count beside it, such as `reachable_count`, the number of endpoints it counts, and is that count over `total_endpoints`, rounded down. A count and its percentage are left out when a value behind them could not be read.
 
 | Field | Description |
 |-------|-------------|
@@ -193,6 +202,10 @@ When endpoints fail to respond, a `diagnostics` block records one entry per fail
   ]
 }
 ```
+
+### Collector Result
+
+The collector also emits `artifacts/tls.collector-result.json`. It lists a gap for each value left out, such as a TLS version whose probe timed out, with a code like `timeout` or `vendor_error` and the probe that failed, such as `tls.probe.tls10`. It also counts the connections the collector made and lists the run's steps, `handshake` and then `protocol_support`, with each step's times and connections.
 
 ### Pass Criteria
 

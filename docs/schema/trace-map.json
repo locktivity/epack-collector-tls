@@ -1,0 +1,2354 @@
+{
+  "artifacts": {
+    "artifacts/tls.json": {
+      "/collected_at": {
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:31"
+          }
+        ]
+      },
+      "/diagnostics/endpoint_errors/*": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls10",
+          "tls.probe.tls11",
+          "tls.probe.tls12",
+          "tls.probe.tls13"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:158"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/collector.go:159"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/collector.go:160"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:161"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/collector.go:164"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:167"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:11"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:12"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:15"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:18"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:28"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:33"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:34"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:35"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:36"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:77"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:111"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:113"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:115"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:116"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:117"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:127"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:131"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:132"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:137"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:142"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:143"
+          }
+        ]
+      },
+      "/endpoints/*/assessment/certificate_valid": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:27"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:40"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:11"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:12"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:15"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:18"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:28"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:31"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:39"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:40"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/posture.go:118",
+            "end": 120
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:105"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:106"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:257"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:259"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:298"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:300"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:302"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:306"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:307"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:308"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:309"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:314"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/assessment/expired": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:27"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:40"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:11"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:12"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:15"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:18"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:28"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:31"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:39"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:40"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/posture.go:118",
+            "end": 120
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:105"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:106"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:298"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:300"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:304"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:306"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:307"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:309"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:312"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/assessment/expiring_soon": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:27"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:40"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:11"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:12"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:15"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:18"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:28"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:31"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:39"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:40"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/posture.go:118",
+            "end": 120
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:105"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:106"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:250"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:298"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:300"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:305"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:306"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:307"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:309"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:310"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:313"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/assessment/hostname_valid": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:27"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:40"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:11"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:12"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:15"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:18"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:28"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:31"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:39"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:40"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/posture.go:118",
+            "end": 120
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:105"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:106"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:257"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:298"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:300"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:303"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:306"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:311"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/assessment/issues": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:102"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:105"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:106"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:110"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:113"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:114"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:257"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:259"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:292"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:294"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:295"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:298"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:300"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:301"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:306"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:308"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:309"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:310"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:317"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:318"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:320"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:321"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:323"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:324"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:326"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:327"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:328"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:329"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:334"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:335"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:336"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:337"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:339"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:340"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:343"
+          }
+        ]
+      },
+      "/endpoints/*/assessment/issues/*": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls12",
+          "tls.probe.tls13"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:102"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:105"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:106"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:110"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:113"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:114"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:257"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:259"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:292"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:294"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:295"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:298"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:300"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:301"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:306"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:308"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:309"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:310"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:317"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:318"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:320"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:321"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:323"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:324"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:326"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:327"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:328"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:329"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:334"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:335"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:336"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:337"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:339"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:340"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:343"
+          }
+        ]
+      },
+      "/endpoints/*/assessment/legacy_protocol_supported": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls10",
+          "tls.probe.tls11"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:112"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:219"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:220"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:221"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:222"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:223"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:335"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/tls.go:349",
+            "end": 358
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:163"
+        ]
+      },
+      "/endpoints/*/assessment/modern_protocol": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls12",
+          "tls.probe.tls13"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:112"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:219"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:224"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:225"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:226"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:227"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:334"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/tls.go:349",
+            "end": 358
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:160"
+        ]
+      },
+      "/endpoints/*/certificate": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:27"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:40"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:11"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:12"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:15"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:18"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:28"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/handler.go:31"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:39"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/handler.go:40"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:105"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:106"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/tls.go:242",
+            "end": 261
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/chain_length": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:256"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/dns_names/*": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:251"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/expires_in_days": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:250"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/fingerprint_sha256": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:253"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/tls.go:379",
+            "end": 382
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/hostname_valid": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:257"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/ip_addresses": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:252"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/tls.go:384",
+            "end": 390
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/issuer_common_name": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:246"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/not_after": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:249"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/not_before": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:248"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/public_key_algorithm": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:255"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/serial_number": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:247"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/signature_algorithm": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:254"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/subject_common_name": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:245"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/certificate/trusted_chain": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:259"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/tls.go:267",
+            "end": 286
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/errors/*": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls10",
+          "tls.probe.tls11",
+          "tls.probe.tls12",
+          "tls.probe.tls13"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:28"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:33"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:34"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:35"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:36"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:111"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:113"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:115"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:116"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:117"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:127"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:131"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:132"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:137"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:142"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:143"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/tls.go:364",
+            "end": 377
+          }
+        ]
+      },
+      "/endpoints/*/host": {
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:11"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:12"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:15"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:18"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:77"
+          }
+        ]
+      },
+      "/endpoints/*/port": {
+        "code": [
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:12"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:15"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/endpoint.go:18"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/endpoint.go:21"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:77"
+          }
+        ]
+      },
+      "/endpoints/*/reachable": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "helper",
+            "line": "internal/collector/posture.go:118",
+            "end": 120
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:102"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:110"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:113"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:114"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/tls/negotiated_cipher_suite": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:104"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/tls/negotiated_version": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:100"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:103"
+          },
+          {
+            "role": "helper",
+            "line": "internal/collector/tls.go:364",
+            "end": 377
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:118"
+        ]
+      },
+      "/endpoints/*/tls/protocol_support/tls_1_0": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls10"
+        ],
+        "code": [
+          {
+            "role": "helper",
+            "line": "internal/collector/posture.go:118",
+            "end": 120
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:112"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:219"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:220"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:221"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:144"
+        ]
+      },
+      "/endpoints/*/tls/protocol_support/tls_1_1": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls11"
+        ],
+        "code": [
+          {
+            "role": "helper",
+            "line": "internal/collector/posture.go:118",
+            "end": 120
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:112"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:219"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:222"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:223"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:144"
+        ]
+      },
+      "/endpoints/*/tls/protocol_support/tls_1_2": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls12"
+        ],
+        "code": [
+          {
+            "role": "helper",
+            "line": "internal/collector/posture.go:118",
+            "end": 120
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:112"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:219"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:224"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:225"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:144"
+        ]
+      },
+      "/endpoints/*/tls/protocol_support/tls_1_3": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls13"
+        ],
+        "code": [
+          {
+            "role": "helper",
+            "line": "internal/collector/posture.go:118",
+            "end": 120
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:75"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/tls.go:98"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:99"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:108"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:112"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:219"
+          },
+          {
+            "role": "condition",
+            "line": "internal/collector/tls.go:226"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/tls.go:227"
+          }
+        ],
+        "gaps": [
+          "internal/collector/tls.go:144"
+        ]
+      },
+      "/schema_version": {
+        "code": [
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:30"
+          }
+        ]
+      },
+      "/summary/all_certificates_valid": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:91"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:105"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:118"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:118"
+        ]
+      },
+      "/summary/all_modern_protocol": {
+        "operations": [
+          "tls.probe.tls12",
+          "tls.probe.tls13"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:91"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:107"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:119"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:119"
+        ]
+      },
+      "/summary/certificate_valid_count": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:105"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:113"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:113"
+        ]
+      },
+      "/summary/certificate_valid_pct": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:105"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:113"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:113"
+        ]
+      },
+      "/summary/expiring_soon_count": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:108"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:116"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:116"
+        ]
+      },
+      "/summary/expiring_soon_pct": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:108"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:116"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:116"
+        ]
+      },
+      "/summary/hostname_valid_count": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:106"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:114"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:114"
+        ]
+      },
+      "/summary/hostname_valid_pct": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:106"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:114"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:114"
+        ]
+      },
+      "/summary/legacy_protocol_supported_count": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls10",
+          "tls.probe.tls11"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:109"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:117"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:117"
+        ]
+      },
+      "/summary/legacy_protocol_supported_pct": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls10",
+          "tls.probe.tls11"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:109"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:117"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:117"
+        ]
+      },
+      "/summary/modern_protocol_count": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls12",
+          "tls.probe.tls13"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:107"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:115"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:115"
+        ]
+      },
+      "/summary/modern_protocol_pct": {
+        "operations": [
+          "tls.handshake",
+          "tls.probe.tls12",
+          "tls.probe.tls13"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:107"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:115"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:115"
+        ]
+      },
+      "/summary/reachable_count": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:104"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:112"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:112"
+        ]
+      },
+      "/summary/reachable_pct": {
+        "operations": [
+          "tls.handshake"
+        ],
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:82"
+          },
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:104"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:112"
+          }
+        ],
+        "gaps": [
+          "internal/collector/collector.go:112"
+        ]
+      },
+      "/summary/total_endpoints": {
+        "code": [
+          {
+            "role": "input",
+            "line": "internal/collector/collector.go:81"
+          },
+          {
+            "role": "assign",
+            "line": "internal/collector/collector.go:111"
+          }
+        ]
+      }
+    }
+  },
+  "lines": {
+    "internal/collector/collector.go:27": "\ts := scanner{dial: cfg.Dial, roots: cfg.RootCAs, timeout: timeout, progress: cfg.OnProgress}",
+    "internal/collector/collector.go:30": "\t\tSchemaVersion: SchemaVersion,",
+    "internal/collector/collector.go:31": "\t\tCollectedAt:   cfg.Now().UTC(),",
+    "internal/collector/collector.go:40": "\t\te.now = cfg.Now()",
+    "internal/collector/collector.go:81": "\ttotal := len(endpoints)",
+    "internal/collector/collector.go:82": "\tratio := func(field string, t tally) (*int, *int) {",
+    "internal/collector/collector.go:91": "\tevery := func(pointer string, t tally) *bool {",
+    "internal/collector/collector.go:104": "\treachable := count(endpoints, gaps, \"/reachable\", func(e EndpointResult) *bool { return e.Reachable })",
+    "internal/collector/collector.go:105": "\tcertValid := count(endpoints, gaps, \"/assessment/certificate_valid\", func(e EndpointResult) *bool { return e.Assessment.CertificateValid })",
+    "internal/collector/collector.go:106": "\thostnameValid := count(endpoints, gaps, \"/assessment/hostname_valid\", func(e EndpointResult) *bool { return e.Assessment.HostnameValid })",
+    "internal/collector/collector.go:107": "\tmodern := count(endpoints, gaps, \"/assessment/modern_protocol\", func(e EndpointResult) *bool { return e.Assessment.ModernProtocol })",
+    "internal/collector/collector.go:108": "\texpiringSoon := count(endpoints, gaps, \"/assessment/expiring_soon\", func(e EndpointResult) *bool { return e.Assessment.ExpiringSoon })",
+    "internal/collector/collector.go:109": "\tlegacy := count(endpoints, gaps, \"/assessment/legacy_protocol_supported\", func(e EndpointResult) *bool { return e.Assessment.LegacyProtocolSupported })",
+    "internal/collector/collector.go:111": "\tsummary := Summary{TotalEndpoints: total}",
+    "internal/collector/collector.go:112": "\tsummary.ReachableCount, summary.ReachablePct = ratio(\"reachable\", reachable)",
+    "internal/collector/collector.go:113": "\tsummary.CertificateValidCount, summary.CertificateValidPct = ratio(\"certificate_valid\", certValid)",
+    "internal/collector/collector.go:114": "\tsummary.HostnameValidCount, summary.HostnameValidPct = ratio(\"hostname_valid\", hostnameValid)",
+    "internal/collector/collector.go:115": "\tsummary.ModernProtocolCount, summary.ModernProtocolPct = ratio(\"modern_protocol\", modern)",
+    "internal/collector/collector.go:116": "\tsummary.ExpiringSoonCount, summary.ExpiringSoonPct = ratio(\"expiring_soon\", expiringSoon)",
+    "internal/collector/collector.go:117": "\tsummary.LegacyProtocolSupportedCount, summary.LegacyProtocolSupportedPct = ratio(\"legacy_protocol_supported\", legacy)",
+    "internal/collector/collector.go:118": "\tsummary.AllCertificatesValid = every(\"/summary/all_certificates_valid\", certValid)",
+    "internal/collector/collector.go:119": "\tsummary.AllModernProtocol = every(\"/summary/all_modern_protocol\", modern)",
+    "internal/collector/collector.go:158": "\tvar endpointErrors []string",
+    "internal/collector/collector.go:159": "\tfor _, endpoint := range endpoints {",
+    "internal/collector/collector.go:160": "\t\tfor _, err := range endpoint.Errors {",
+    "internal/collector/collector.go:161": "\t\t\tendpointErrors = append(endpointErrors, fmt.Sprintf(\"%s:%d: %s\", endpoint.Host, endpoint.Port, err))",
+    "internal/collector/collector.go:164": "\tif len(endpointErrors) == 0 {",
+    "internal/collector/collector.go:167": "\treturn \u0026Diagnostics{EndpointErrors: endpointErrors}",
+    "internal/collector/endpoint.go:11": "\thost = normalizeHost(host)",
+    "internal/collector/endpoint.go:12": "\tif host == \"\" {",
+    "internal/collector/endpoint.go:15": "\tif port \u003c 1 || port \u003e 65535 {",
+    "internal/collector/endpoint.go:18": "\tif !validHost(host) {",
+    "internal/collector/endpoint.go:21": "\treturn Endpoint{Host: host, Port: port}, nil",
+    "internal/collector/handler.go:28": "\tif err != nil {",
+    "internal/collector/handler.go:31": "\tif len(endpoints) == 0 {",
+    "internal/collector/handler.go:39": "\t\tRootCAs:    dialer.RootCAs(),",
+    "internal/collector/handler.go:40": "\t\tNow:        func() time.Time { return componentsdk.Now(ctx) },",
+    "internal/collector/posture.go:118": "func ptr[T any](v T) *T {",
+    "internal/collector/posture.go:119": "\treturn \u0026v",
+    "internal/collector/posture.go:120": "}",
+    "internal/collector/tls.go:28": "var probes = []struct {",
+    "internal/collector/tls.go:33": "\t{tls.VersionTLS10, \"tls.probe.tls10\", \"tls_1_0\"},",
+    "internal/collector/tls.go:34": "\t{tls.VersionTLS11, \"tls.probe.tls11\", \"tls_1_1\"},",
+    "internal/collector/tls.go:35": "\t{tls.VersionTLS12, \"tls.probe.tls12\", \"tls_1_2\"},",
+    "internal/collector/tls.go:36": "\t{tls.VersionTLS13, \"tls.probe.tls13\", \"tls_1_3\"},",
+    "internal/collector/tls.go:75": "\t\tendpoint: endpoint,",
+    "internal/collector/tls.go:77": "\t\tresult:   EndpointResult{Host: endpoint.Host, Port: endpoint.Port, TLS: \u0026TLSDetails{}},",
+    "internal/collector/tls.go:98": "\tstate, err := s.handshake(ctx, e.endpoint, handshakeOperation, tls.VersionTLS12, 0)",
+    "internal/collector/tls.go:99": "\tswitch {",
+    "internal/collector/tls.go:100": "\tcase err == nil:",
+    "internal/collector/tls.go:102": "\t\tresult.Reachable = ptr(true)",
+    "internal/collector/tls.go:103": "\t\tresult.TLS.NegotiatedVersion = tlsVersionName(state.Version)",
+    "internal/collector/tls.go:104": "\t\tresult.TLS.NegotiatedCipherSuite = tls.CipherSuiteName(state.CipherSuite)",
+    "internal/collector/tls.go:105": "\t\tif len(state.PeerCertificates) \u003e 0 {",
+    "internal/collector/tls.go:106": "\t\t\tresult.Certificate = summarizeCertificate(e.endpoint.Host, state.PeerCertificates, s.roots, e.now)",
+    "internal/collector/tls.go:108": "\tcase unreachable(err):",
+    "internal/collector/tls.go:110": "\t\tresult.Reachable = ptr(false)",
+    "internal/collector/tls.go:111": "\t\tresult.Errors = append(result.Errors, \"TLS handshake failed: \"+err.Error())",
+    "internal/collector/tls.go:112": "\t\tresult.TLS.ProtocolSupport = ProtocolSupport{TLS10: ptr(false), TLS11: ptr(false), TLS12: ptr(false), TLS13: ptr(false)}",
+    "internal/collector/tls.go:113": "\tcase turnedDown(err):",
+    "internal/collector/tls.go:114": "\t\tresult.Reachable = ptr(false)",
+    "internal/collector/tls.go:115": "\t\tresult.Errors = append(result.Errors, \"TLS handshake failed: \"+err.Error())",
+    "internal/collector/tls.go:116": "\tdefault:",
+    "internal/collector/tls.go:117": "\t\tresult.Errors = append(result.Errors, \"TLS handshake failed: \"+err.Error())",
+    "internal/collector/tls.go:118": "\t\te.leaveOut(err, \"/reachable\", \"/tls/negotiated_version\", \"/tls/negotiated_cipher_suite\", \"/certificate\",",
+    "internal/collector/tls.go:127": "\tif e.unreachable {",
+    "internal/collector/tls.go:131": "\tfor _, p := range probes {",
+    "internal/collector/tls.go:132": "\t\tif p.version == e.negotiated {",
+    "internal/collector/tls.go:137": "\t\tswitch {",
+    "internal/collector/tls.go:142": "\t\tdefault:",
+    "internal/collector/tls.go:143": "\t\t\te.result.Errors = append(e.result.Errors, tlsVersionName(p.version)+\" probe failed: \"+err.Error())",
+    "internal/collector/tls.go:144": "\t\t\te.leaveOut(err, \"/tls/protocol_support/\"+p.field)",
+    "internal/collector/tls.go:160": "\t\te.leaveOut(e.modernErr, \"/assessment/modern_protocol\")",
+    "internal/collector/tls.go:163": "\t\te.leaveOut(e.legacyErr, \"/assessment/legacy_protocol_supported\")",
+    "internal/collector/tls.go:219": "\tswitch version {",
+    "internal/collector/tls.go:220": "\tcase tls.VersionTLS10:",
+    "internal/collector/tls.go:221": "\t\tp.TLS10 = supported",
+    "internal/collector/tls.go:222": "\tcase tls.VersionTLS11:",
+    "internal/collector/tls.go:223": "\t\tp.TLS11 = supported",
+    "internal/collector/tls.go:224": "\tcase tls.VersionTLS12:",
+    "internal/collector/tls.go:225": "\t\tp.TLS12 = supported",
+    "internal/collector/tls.go:226": "\tcase tls.VersionTLS13:",
+    "internal/collector/tls.go:227": "\t\tp.TLS13 = supported",
+    "internal/collector/tls.go:242": "func summarizeCertificate(host string, chain []*x509.Certificate, roots *x509.CertPool, now time.Time) *Certificate {",
+    "internal/collector/tls.go:243": "\tleaf := chain[0]",
+    "internal/collector/tls.go:244": "\tcert := \u0026Certificate{",
+    "internal/collector/tls.go:245": "\t\tSubjectCommonName:  leaf.Subject.CommonName,",
+    "internal/collector/tls.go:246": "\t\tIssuerCommonName:   leaf.Issuer.CommonName,",
+    "internal/collector/tls.go:247": "\t\tSerialNumber:       leaf.SerialNumber.String(),",
+    "internal/collector/tls.go:248": "\t\tNotBefore:          leaf.NotBefore,",
+    "internal/collector/tls.go:249": "\t\tNotAfter:           leaf.NotAfter,",
+    "internal/collector/tls.go:250": "\t\tExpiresInDays:      int(leaf.NotAfter.Sub(now).Hours() / 24),",
+    "internal/collector/tls.go:251": "\t\tDNSNames:           append([]string{}, leaf.DNSNames...),",
+    "internal/collector/tls.go:252": "\t\tIPAddresses:        ipStrings(leaf.IPAddresses),",
+    "internal/collector/tls.go:253": "\t\tFingerprintSHA256:  fingerprintSHA256(leaf.Raw),",
+    "internal/collector/tls.go:254": "\t\tSignatureAlgorithm: leaf.SignatureAlgorithm.String(),",
+    "internal/collector/tls.go:255": "\t\tPublicKeyAlgorithm: leaf.PublicKeyAlgorithm.String(),",
+    "internal/collector/tls.go:256": "\t\tChainLength:        len(chain),",
+    "internal/collector/tls.go:257": "\t\tHostnameValid:      leaf.VerifyHostname(host) == nil,",
+    "internal/collector/tls.go:258": "\t}",
+    "internal/collector/tls.go:259": "\tcert.TrustedChain = verifyChain(chain, roots, now) == nil",
+    "internal/collector/tls.go:260": "\treturn cert",
+    "internal/collector/tls.go:261": "}",
+    "internal/collector/tls.go:267": "func verifyChain(chain []*x509.Certificate, roots *x509.CertPool, now time.Time) error {",
+    "internal/collector/tls.go:268": "\tintermediates := x509.NewCertPool()",
+    "internal/collector/tls.go:269": "\tfor _, cert := range chain[1:] {",
+    "internal/collector/tls.go:270": "\t\tintermediates.AddCert(cert)",
+    "internal/collector/tls.go:271": "\t}",
+    "internal/collector/tls.go:272": "\tleaf := chain[0]",
+    "internal/collector/tls.go:273": "\tat := now",
+    "internal/collector/tls.go:274": "\tif at.After(leaf.NotAfter) {",
+    "internal/collector/tls.go:275": "\t\tat = leaf.NotAfter",
+    "internal/collector/tls.go:276": "\t}",
+    "internal/collector/tls.go:277": "\tif at.Before(leaf.NotBefore) {",
+    "internal/collector/tls.go:278": "\t\tat = leaf.NotBefore",
+    "internal/collector/tls.go:279": "\t}",
+    "internal/collector/tls.go:280": "\t_, err := leaf.Verify(x509.VerifyOptions{",
+    "internal/collector/tls.go:281": "\t\tRoots:         roots,",
+    "internal/collector/tls.go:282": "\t\tIntermediates: intermediates,",
+    "internal/collector/tls.go:283": "\t\tCurrentTime:   at,",
+    "internal/collector/tls.go:284": "\t})",
+    "internal/collector/tls.go:285": "\treturn err",
+    "internal/collector/tls.go:286": "}",
+    "internal/collector/tls.go:292": "\tissues := []string{}",
+    "internal/collector/tls.go:294": "\tif result.Reachable != nil \u0026\u0026 !*result.Reachable {",
+    "internal/collector/tls.go:295": "\t\tissues = append(issues, \"Endpoint was not reachable over modern TLS\")",
+    "internal/collector/tls.go:298": "\tswitch {",
+    "internal/collector/tls.go:300": "\tcase result.Certificate == nil:",
+    "internal/collector/tls.go:301": "\t\tissues = append(issues, \"No certificate was presented\")",
+    "internal/collector/tls.go:302": "\t\tassessment.CertificateValid = ptr(false)",
+    "internal/collector/tls.go:303": "\t\tassessment.HostnameValid = ptr(false)",
+    "internal/collector/tls.go:304": "\t\tassessment.Expired = ptr(false)",
+    "internal/collector/tls.go:305": "\t\tassessment.ExpiringSoon = ptr(false)",
+    "internal/collector/tls.go:306": "\tdefault:",
+    "internal/collector/tls.go:307": "\t\tcertificate := *result.Certificate",
+    "internal/collector/tls.go:308": "\t\tnotYetValid := certificate.NotBefore.After(now)",
+    "internal/collector/tls.go:309": "\t\texpired := certificateExpired(certificate, now)",
+    "internal/collector/tls.go:310": "\t\texpiringSoon := !expired \u0026\u0026 certificate.ExpiresInDays \u003c= expiringSoonDays",
+    "internal/collector/tls.go:311": "\t\tassessment.HostnameValid = ptr(certificate.HostnameValid)",
+    "internal/collector/tls.go:312": "\t\tassessment.Expired = ptr(expired)",
+    "internal/collector/tls.go:313": "\t\tassessment.ExpiringSoon = ptr(expiringSoon)",
+    "internal/collector/tls.go:314": "\t\tassessment.CertificateValid = ptr(certificate.TrustedChain \u0026\u0026 certificate.HostnameValid \u0026\u0026",
+    "internal/collector/tls.go:317": "\t\tif !certificate.TrustedChain {",
+    "internal/collector/tls.go:318": "\t\t\tissues = append(issues, \"Certificate chain is not trusted\")",
+    "internal/collector/tls.go:320": "\t\tif !certificate.HostnameValid {",
+    "internal/collector/tls.go:321": "\t\t\tissues = append(issues, \"Certificate hostname does not match the endpoint\")",
+    "internal/collector/tls.go:323": "\t\tif notYetValid {",
+    "internal/collector/tls.go:324": "\t\t\tissues = append(issues, \"Certificate is not yet valid\")",
+    "internal/collector/tls.go:326": "\t\tif expired {",
+    "internal/collector/tls.go:327": "\t\t\tissues = append(issues, \"Certificate is expired\")",
+    "internal/collector/tls.go:328": "\t\t} else if expiringSoon {",
+    "internal/collector/tls.go:329": "\t\t\tissues = append(issues, \"Certificate expires within 30 days\")",
+    "internal/collector/tls.go:334": "\tassessment.ModernProtocol = either(support.TLS12, support.TLS13)",
+    "internal/collector/tls.go:335": "\tassessment.LegacyProtocolSupported = either(support.TLS10, support.TLS11)",
+    "internal/collector/tls.go:336": "\tif assessment.ModernProtocol != nil \u0026\u0026 !*assessment.ModernProtocol {",
+    "internal/collector/tls.go:337": "\t\tissues = append(issues, \"TLS 1.2 or TLS 1.3 support was not detected\")",
+    "internal/collector/tls.go:339": "\tif assessment.LegacyProtocolSupported != nil \u0026\u0026 *assessment.LegacyProtocolSupported {",
+    "internal/collector/tls.go:340": "\t\tissues = append(issues, \"TLS 1.0 or TLS 1.1 is supported\")",
+    "internal/collector/tls.go:343": "\tassessment.Issues = issues",
+    "internal/collector/tls.go:349": "func either(a, b *bool) *bool {",
+    "internal/collector/tls.go:350": "\tswitch {",
+    "internal/collector/tls.go:351": "\tcase (a != nil \u0026\u0026 *a) || (b != nil \u0026\u0026 *b):",
+    "internal/collector/tls.go:352": "\t\treturn ptr(true)",
+    "internal/collector/tls.go:353": "\tcase a != nil \u0026\u0026 b != nil:",
+    "internal/collector/tls.go:354": "\t\treturn ptr(false)",
+    "internal/collector/tls.go:355": "\tdefault:",
+    "internal/collector/tls.go:356": "\t\treturn nil",
+    "internal/collector/tls.go:357": "\t}",
+    "internal/collector/tls.go:358": "}",
+    "internal/collector/tls.go:364": "func tlsVersionName(version uint16) string {",
+    "internal/collector/tls.go:365": "\tswitch version {",
+    "internal/collector/tls.go:366": "\tcase tls.VersionTLS10:",
+    "internal/collector/tls.go:367": "\t\treturn \"TLS 1.0\"",
+    "internal/collector/tls.go:368": "\tcase tls.VersionTLS11:",
+    "internal/collector/tls.go:369": "\t\treturn \"TLS 1.1\"",
+    "internal/collector/tls.go:370": "\tcase tls.VersionTLS12:",
+    "internal/collector/tls.go:371": "\t\treturn \"TLS 1.2\"",
+    "internal/collector/tls.go:372": "\tcase tls.VersionTLS13:",
+    "internal/collector/tls.go:373": "\t\treturn \"TLS 1.3\"",
+    "internal/collector/tls.go:374": "\tdefault:",
+    "internal/collector/tls.go:375": "\t\treturn fmt.Sprintf(\"0x%x\", version)",
+    "internal/collector/tls.go:376": "\t}",
+    "internal/collector/tls.go:377": "}",
+    "internal/collector/tls.go:379": "func fingerprintSHA256(raw []byte) string {",
+    "internal/collector/tls.go:380": "\tsum := sha256.Sum256(raw)",
+    "internal/collector/tls.go:381": "\treturn strings.ToUpper(hex.EncodeToString(sum[:]))",
+    "internal/collector/tls.go:382": "}",
+    "internal/collector/tls.go:384": "func ipStrings(ips []net.IP) []string {",
+    "internal/collector/tls.go:385": "\tresult := make([]string, 0, len(ips))",
+    "internal/collector/tls.go:386": "\tfor _, ip := range ips {",
+    "internal/collector/tls.go:387": "\t\tresult = append(result, ip.String())",
+    "internal/collector/tls.go:388": "\t}",
+    "internal/collector/tls.go:389": "\treturn result",
+    "internal/collector/tls.go:390": "}"
+  }
+}
