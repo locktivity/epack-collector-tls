@@ -86,7 +86,7 @@ The release workflow:
 
 ## Output Schema
 
-The collector outputs to `artifacts/tls.json`. See [docs/schema/v1.0.0.json](docs/schema/v1.0.0.json) for the full JSON schema.
+The collector outputs to `artifacts/tls.tls.json`, an `evidencepack/tls@v1` artifact. The SDK's [evidencepack/tls@v1 schema](https://github.com/locktivity/epack/blob/main/componentsdk/schema/normalized/tls.v1.json) describes every field. [docs/schema/methods.json](docs/schema/methods.json) says how this collector measures each one.
 
 ### Key Fields
 
@@ -100,7 +100,9 @@ The collector outputs to `artifacts/tls.json`. See [docs/schema/v1.0.0.json](doc
 
 Each summary percentage has the count it is taken of beside it, such as
 `certificate_valid_count` for `certificate_valid_pct`, and is that count over
-`total_endpoints`, rounded down.
+`total_endpoints`. `expiring_soon_pct` and `legacy_protocol_supported_pct`
+round up, so one endpoint in either state never shows as 0. The others round
+down.
 
 ### Partial collection and exit codes
 
@@ -113,11 +115,14 @@ emits the posture of every configured endpoint.
 | 2 | `config_invalid` | `endpoints` is missing or empty, is not a list, or has an invalid host or port |
 
 Each endpoint is judged only on what it answered. A refused connection, a host
-name that does not exist, a TLS alert, and a reply that is not TLS are answers:
-the endpoint reads as not reachable over modern TLS, and a TLS version it turns
-down reads as `false`. A handshake that times out, is reset, or fails another
-way is not an answer, so the values that depend on it are left out rather than
-written as `false`.
+name that does not exist, a handshake_failure or protocol_version alert in reply
+to the ClientHello, a ServerHello for another version, and a reply that is not
+TLS are answers: the endpoint reads as not reachable over modern TLS, and a TLS
+version it turns down reads as `false`. A TLS version the endpoint selects in
+its ServerHello reads as `true`, even when the handshake then fails because the
+endpoint requires a client certificate. A handshake that times out, is reset,
+or fails another way is not an answer, so the values that depend on it are left
+out rather than written as `false`.
 
 The artifact `artifacts/tls.collector-result.json` lists a gap for each value
 left out, with a code such as `timeout` or `vendor_error` and the handshake or
@@ -142,7 +147,8 @@ For a clean TLS posture:
 - [Overview](docs/overview.md) - What it collects and how it works
 - [Configuration](docs/configuration.md) - Setup and options
 - [Examples](docs/examples.md) - Usage examples and sample output
-- [Schema](docs/schema/v1.0.0.json) - JSON schema for output
+- [Schema](https://github.com/locktivity/epack/blob/main/componentsdk/schema/normalized/tls.v1.json) - the SDK's JSON schema for the output
+- [Methods](docs/schema/methods.json) - how the collector measures each field
 
 ## License
 

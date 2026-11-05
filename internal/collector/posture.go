@@ -12,7 +12,7 @@ import (
 const (
 	SchemaVersion = "1.0.0"
 	SchemaID      = "evidencepack/tls@v1"
-	ArtifactPath  = "artifacts/tls.json"
+	ArtifactPath  = "artifacts/tls.tls.json"
 )
 
 type Config struct {

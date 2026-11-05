@@ -38,9 +38,9 @@ func parseEndpointValue(value any) (Endpoint, error) {
 		return parseEndpointString(endpoint)
 	case map[string]any:
 		host, _ := endpoint["host"].(string)
-		port := intFromAny(endpoint["port"])
-		if port == 0 {
-			port = 443
+		port, err := configuredPort(endpoint["port"])
+		if err != nil {
+			return Endpoint{}, err
 		}
 		return NewEndpoint(host, port)
 	default:
@@ -68,18 +68,25 @@ func parseEndpointString(value string) (Endpoint, error) {
 	return NewEndpoint(host, port)
 }
 
-func intFromAny(value any) int {
+// configuredPort reads the port of an endpoint object. A missing port means
+// 443, and NewEndpoint checks the range.
+func configuredPort(value any) (int, error) {
 	switch v := value.(type) {
+	case nil:
+		return 443, nil
 	case int:
-		return v
+		return v, nil
 	case int64:
-		return int(v)
+		return int(v), nil
 	case float64:
-		return int(v)
+		return int(v), nil
 	case string:
-		i, _ := strconv.Atoi(v)
-		return i
+		port, err := strconv.Atoi(v)
+		if err != nil {
+			return 0, fmt.Errorf("invalid port %q", v)
+		}
+		return port, nil
 	default:
-		return 0
+		return 0, fmt.Errorf("invalid port %v", v)
 	}
 }

@@ -1,12 +1,14 @@
 package collector
 
 import (
+	"bytes"
 	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"io"
 	"maps"
 	"math/big"
 	"net"
@@ -119,6 +121,61 @@ func TestSummarizeCertificate(t *testing.T) {
 	}
 }
 
+// A certificate with no fixed expiry has a not_after in the year 9999
+// (RFC 5280 section 4.1.2.5). That is more than a time.Duration holds.
+func TestSummarizeCertificateExpiresInDays(t *testing.T) {
+	now := time.Date(2026, 11, 4, 12, 0, 0, 500_000_000, time.UTC)
+	for _, test := range []struct {
+		name     string
+		notAfter time.Time
+		want     int
+	}{
+		{"half a second short of 90 days", now.Truncate(time.Second).Add(90 * 24 * time.Hour), 89},
+		{"no fixed expiry", time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC), 2912135},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			leaf := &x509.Certificate{SerialNumber: big.NewInt(1), NotBefore: now.Add(-time.Hour), NotAfter: test.notAfter}
+			cert := summarizeCertificate("app.example.com", []*x509.Certificate{leaf}, nil, now)
+			if cert.ExpiresInDays != test.want {
+				t.Errorf("ExpiresInDays = %d for not_after %s, want %d", cert.ExpiresInDays, test.notAfter.Format(time.RFC3339), test.want)
+			}
+		})
+	}
+}
+
+// A signature algorithm without a name in crypto/x509 reads as its object
+// identifier from the certificate.
+func TestSummarizeCertificateSignatureAlgorithm(t *testing.T) {
+	der := selfSignedRSACertificate(t).Certificate[0]
+	// sha256WithRSAEncryption, 1.2.840.113549.1.1.11, appears once in
+	// tbsCertificate and once after it. The unnamed identifier is the same with
+	// its last arc changed to 127.
+	named := []byte{0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0B}
+	unnamed := append(slices.Clone(named[:len(named)-1]), 0x7F)
+	if n := bytes.Count(der, named); n != 2 {
+		t.Fatalf("certificate holds %d sha256WithRSAEncryption identifiers, want 2", n)
+	}
+	for _, test := range []struct {
+		name string
+		der  []byte
+		want string
+	}{
+		{"named", der, "SHA256-RSA"},
+		{"unnamed", bytes.ReplaceAll(der, named, unnamed), "1.2.840.113549.1.1.127"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			leaf, err := x509.ParseCertificate(test.der)
+			if err != nil {
+				t.Fatalf("ParseCertificate returned error: %v", err)
+			}
+			cert := summarizeCertificate("127.0.0.1", []*x509.Certificate{leaf}, nil, time.Now())
+			if cert.SignatureAlgorithm != test.want {
+				t.Errorf("SignatureAlgorithm = %q, want %q", cert.SignatureAlgorithm, test.want)
+			}
+		})
+	}
+}
+
 func TestAssessNotYetValidCertificate(t *testing.T) {
 	now := time.Now().UTC()
 	result := EndpointResult{
@@ -142,6 +199,44 @@ func TestAssessNotYetValidCertificate(t *testing.T) {
 	}
 	if !slices.Contains(assessment.Issues, "Certificate is not yet valid") {
 		t.Errorf("Issues = %v, want not-yet-valid issue", assessment.Issues)
+	}
+}
+
+// A certificate is valid from notBefore through notAfter, inclusive (RFC 5280
+// section 4.1.2.5).
+func TestAssessCertificateValidityPeriodIncludesItsEnds(t *testing.T) {
+	notAfter := time.Date(2026, 11, 4, 12, 0, 0, 0, time.UTC)
+	notBefore := notAfter.Add(-90 * 24 * time.Hour)
+	for _, test := range []struct {
+		name    string
+		now     time.Time
+		expired bool
+		valid   bool
+	}{
+		{"at not_before", notBefore, false, true},
+		{"a second before not_after", notAfter.Add(-time.Second), false, true},
+		{"at not_after", notAfter, false, true},
+		{"a second after not_after", notAfter.Add(time.Second), true, false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			assessment := assess(EndpointResult{
+				Reachable: ptr(true),
+				TLS:       &TLSDetails{ProtocolSupport: ProtocolSupport{TLS12: ptr(true), TLS13: ptr(true)}},
+				Certificate: &Certificate{
+					NotBefore:     notBefore,
+					NotAfter:      notAfter,
+					ExpiresInDays: daysUntil(test.now, notAfter),
+					TrustedChain:  true,
+					HostnameValid: true,
+				},
+			}, test.now)
+			if got := boolText(assessment.Expired); got != strconv.FormatBool(test.expired) {
+				t.Errorf("Expired = %s, want %v", got, test.expired)
+			}
+			if got := boolText(assessment.CertificateValid); got != strconv.FormatBool(test.valid) {
+				t.Errorf("CertificateValid = %s, want %v; issues: %v", got, test.valid, assessment.Issues)
+			}
+		})
 	}
 }
 
@@ -206,8 +301,125 @@ func TestScanEndpointDetectsLegacyOnlyServer(t *testing.T) {
 	}
 }
 
+// A server written before TLS 1.3 turns down a version it lacks by naming an
+// older one in its ServerHello. That version reads false, with no gap.
+func TestScanEndpointReadsAnOlderServerHelloAsTurnedDown(t *testing.T) {
+	for _, test := range []struct {
+		name      string
+		version   uint16
+		reachable bool
+		modern    bool
+		support   []bool // TLS 1.0, 1.1, 1.2 and 1.3
+	}{
+		{"TLS 1.2 only", tls.VersionTLS12, true, true, []bool{false, false, true, false}},
+		{"TLS 1.0 only", tls.VersionTLS10, false, false, []bool{true, false, false, false}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			result, gaps := scanOne(preTLS13Server(t, test.version))
+			if got := boolText(result.Reachable); got != strconv.FormatBool(test.reachable) {
+				t.Errorf("Reachable = %s, want %v; errors: %v", got, test.reachable, result.Errors)
+			}
+			if got := boolText(result.Assessment.ModernProtocol); got != strconv.FormatBool(test.modern) {
+				t.Errorf("ModernProtocol = %s, want %v", got, test.modern)
+			}
+			support := result.TLS.ProtocolSupport
+			for i, got := range []*bool{support.TLS10, support.TLS11, support.TLS12, support.TLS13} {
+				if boolText(got) != strconv.FormatBool(test.support[i]) {
+					t.Errorf("%s support = %s, want %v", tlsVersionName(probes[i].version), boolText(got), test.support[i])
+				}
+			}
+			if len(gaps) != 0 {
+				t.Errorf("gaps = %+v, want none", gaps)
+			}
+		})
+	}
+}
+
+// A server sets the version in its ServerHello and asks for a client
+// certificate later (RFC 5246 sections 7.4.1.3 and 7.4.6). A server that
+// requires a client certificate fails each handshake without one. It still
+// supports each version it sets.
+func TestScanEndpointAgainstAServerThatRequiresAClientCertificate(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		minVersion uint16
+		maxVersion uint16
+		support    []bool // TLS 1.0, 1.1, 1.2 and 1.3
+	}{
+		{"TLS 1.0 only", tls.VersionTLS10, tls.VersionTLS10, []bool{true, false, false, false}},
+		{"TLS 1.2 only", tls.VersionTLS12, tls.VersionTLS12, []bool{false, false, true, false}},
+		{"TLS 1.2 and 1.3", tls.VersionTLS12, tls.VersionTLS13, []bool{false, false, true, true}},
+	} {
+		for _, clientAuth := range []tls.ClientAuthType{tls.NoClientCert, tls.RequireAnyClientCert} {
+			t.Run(test.name+" with "+clientAuth.String(), func(t *testing.T) {
+				result, gaps := scanOne(tlsServer(t, serverConfig(t, test.minVersion, test.maxVersion, clientAuth)))
+				support := result.TLS.ProtocolSupport
+				for i, got := range []*bool{support.TLS10, support.TLS11, support.TLS12, support.TLS13} {
+					if boolText(got) != strconv.FormatBool(test.support[i]) {
+						t.Errorf("%s support = %s, want %v; errors: %v", tlsVersionName(probes[i].version), boolText(got), test.support[i], result.Errors)
+					}
+				}
+				legacy, modern := test.support[0] || test.support[1], test.support[2] || test.support[3]
+				if got := boolText(result.Assessment.LegacyProtocolSupported); got != strconv.FormatBool(legacy) {
+					t.Errorf("LegacyProtocolSupported = %s, want %v", got, legacy)
+				}
+				if got := boolText(result.Assessment.ModernProtocol); got != strconv.FormatBool(modern) {
+					t.Errorf("ModernProtocol = %s, want %v", got, modern)
+				}
+				if len(gaps) != 0 {
+					t.Errorf("gaps = %+v, want none", gaps)
+				}
+			})
+		}
+	}
+}
+
+// Only a handshake_failure or protocol_version alert in reply to a ClientHello
+// turns down the versions it offers (RFC 5246 section 7.4.1.3 and RFC 8446
+// section 6.2). Another alert leaves the values out with a gap.
+func TestScanEndpointReadsOnlyAVersionAlertAsTurnedDown(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		alert      byte
+		turnedDown bool
+	}{
+		{"handshake_failure", 40, true},
+		{"protocol_version", 70, true},
+		{"internal_error", 80, false},
+		{"unrecognized_name", 112, false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			result, gaps := scanOne(alertServer(t, test.alert))
+			want := "left out"
+			if test.turnedDown {
+				want = "false"
+			}
+			left := map[string]bool{}
+			for _, g := range gaps {
+				left[g.pointer] = true
+			}
+			if got := boolText(result.Reachable); got != want {
+				t.Errorf("Reachable = %s, want %s; errors: %v", got, want, result.Errors)
+			}
+			if left["/reachable"] == test.turnedDown {
+				t.Errorf("reachable gap recorded = %v, want %v", left["/reachable"], !test.turnedDown)
+			}
+			support := result.TLS.ProtocolSupport
+			for i, got := range []*bool{support.TLS10, support.TLS11, support.TLS12, support.TLS13} {
+				if boolText(got) != want {
+					t.Errorf("%s support = %s, want %s", tlsVersionName(probes[i].version), boolText(got), want)
+				}
+				if pointer := "/tls/protocol_support/" + probes[i].field; left[pointer] == test.turnedDown {
+					t.Errorf("%s gap recorded = %v, want %v", pointer, left[pointer], !test.turnedDown)
+				}
+			}
+		})
+	}
+}
+
 // A handshake that times out or is reset after the dial counts against its
-// operation in the collector result, with the code of the gaps it leaves.
+// operation, with the code of the gaps it leaves. The run's call counts hold
+// the tally, since a trust-level collector result leaves the counts out.
 func TestHandshakeFailuresCountAgainstTheirOperation(t *testing.T) {
 	silent := localServer(t, func(net.Conn) {})
 	reset := localServer(t, func(conn net.Conn) {
@@ -234,10 +446,10 @@ func TestHandshakeFailuresCountAgainstTheirOperation(t *testing.T) {
 	}
 
 	want := map[componentsdk.Code]int{componentsdk.CodeTimeout: 1, componentsdk.CodeVendorError: 1}
-	if got := len(res.Result.Calls.Operations); got != 1+len(probes) {
+	if got := len(res.Operations); got != 1+len(probes) {
 		t.Errorf("operations = %d, want the handshake and %d probes", got, len(probes))
 	}
-	for _, op := range res.Result.Calls.Operations {
+	for _, op := range res.Operations {
 		if op.Calls != 2 || !maps.Equal(op.Errors, want) {
 			t.Errorf("%s: %d calls with errors %v, want 2 with %v", op.Name, op.Calls, op.Errors, want)
 		}
@@ -294,6 +506,146 @@ func localServer(t *testing.T, handle func(net.Conn)) Endpoint {
 		t.Fatalf("NewEndpoint returned error: %v", err)
 	}
 	return endpoint
+}
+
+// tlsServer serves config on a loopback port and completes each handshake it
+// can.
+func tlsServer(t *testing.T, config *tls.Config) Endpoint {
+	t.Helper()
+	return localServer(t, func(conn net.Conn) {
+		go func() {
+			defer func() { _ = conn.Close() }()
+			_ = tls.Server(conn, config).Handshake()
+		}()
+	})
+}
+
+// serverConfig accepts minVersion through maxVersion with a self-signed
+// certificate. A server that accepts TLS 1.1 or older offers the one cipher
+// suite the legacy tests use.
+func serverConfig(t *testing.T, minVersion, maxVersion uint16, clientAuth tls.ClientAuthType) *tls.Config {
+	t.Helper()
+	config := &tls.Config{
+		Certificates: []tls.Certificate{selfSignedRSACertificate(t)},
+		MinVersion:   minVersion,
+		MaxVersion:   maxVersion,
+		ClientAuth:   clientAuth,
+	}
+	if minVersion <= tls.VersionTLS11 {
+		config.CipherSuites = []uint16{tls.TLS_RSA_WITH_AES_128_CBC_SHA}
+	}
+	return config
+}
+
+// alertServer reads each ClientHello and answers it with a fatal alert with
+// the number alert.
+func alertServer(t *testing.T, alert byte) Endpoint {
+	t.Helper()
+	return localServer(t, func(conn net.Conn) {
+		go func() {
+			defer func() { _ = conn.Close() }()
+			header := make([]byte, 5)
+			if _, err := io.ReadFull(conn, header); err != nil {
+				return
+			}
+			if _, err := io.ReadFull(conn, make([]byte, int(header[3])<<8|int(header[4]))); err != nil {
+				return
+			}
+			_, _ = conn.Write([]byte{21, 3, 3, 0, 2, 2, alert})
+		}()
+	})
+}
+
+// preTLS13Server serves only version, as a server written before TLS 1.3
+// does. It reads the ClientHello's legacy_version and ignores the
+// supported_versions extension. When legacy_version is at least version, the
+// server names version in its ServerHello (RFC 8446 appendix D.1). Otherwise
+// it sends a protocol_version alert.
+func preTLS13Server(t *testing.T, version uint16) Endpoint {
+	t.Helper()
+	cert := selfSignedRSACertificate(t)
+	return localServer(t, func(conn net.Conn) {
+		go func() {
+			defer func() { _ = conn.Close() }()
+			header := make([]byte, 5)
+			if _, err := io.ReadFull(conn, header); err != nil {
+				return
+			}
+			hello := make([]byte, int(header[3])<<8|int(header[4]))
+			if _, err := io.ReadFull(conn, hello); err != nil {
+				return
+			}
+			legacy, offered := clientHelloVersions(hello)
+			switch {
+			case legacy < version:
+				_, _ = conn.Write([]byte{21, 3, 3, 0, 2, 2, 70})
+			case !slices.Contains(offered, version):
+				_, _ = conn.Write(serverHelloRecord(version))
+				_, _ = io.Copy(io.Discard, conn)
+			default:
+				config := &tls.Config{Certificates: []tls.Certificate{cert}, MinVersion: version, MaxVersion: version}
+				if version <= tls.VersionTLS11 {
+					config.CipherSuites = []uint16{tls.TLS_RSA_WITH_AES_128_CBC_SHA}
+				}
+				_ = tls.Server(&replayConn{Conn: conn, read: append(header, hello...)}, config).Handshake()
+			}
+		}()
+	})
+}
+
+// clientHelloVersions returns a ClientHello message's legacy_version and the
+// versions its supported_versions extension lists.
+func clientHelloVersions(msg []byte) (legacy uint16, offered []uint16) {
+	// type(1) length(3) legacy_version(2) random(32) session_id<1>
+	// cipher_suites<2> compression_methods<1> extensions<2>
+	legacy = uint16(msg[4])<<8 | uint16(msg[5])
+	i := 4 + 2 + 32
+	i += 1 + int(msg[i])
+	i += 2 + (int(msg[i])<<8 | int(msg[i+1]))
+	i += 1 + int(msg[i])
+	extensions := msg[i+2 : i+2+(int(msg[i])<<8|int(msg[i+1]))]
+	for len(extensions) >= 4 {
+		size := int(extensions[2])<<8 | int(extensions[3])
+		if extensions[0] == 0 && extensions[1] == 43 {
+			for list := extensions[5 : 4+size]; len(list) >= 2; list = list[2:] {
+				offered = append(offered, uint16(list[0])<<8|uint16(list[1]))
+			}
+		}
+		extensions = extensions[4+size:]
+	}
+	return legacy, offered
+}
+
+// serverHelloRecord is a record holding a ServerHello for version, with the
+// TLS_RSA_WITH_AES_128_CBC_SHA suite and no extensions.
+func serverHelloRecord(version uint16) []byte {
+	hello := append([]byte{byte(version >> 8), byte(version)}, make([]byte, 32)...)
+	hello = append(hello, 0, 0x00, 0x2f, 0)
+	message := append([]byte{2, 0, 0, byte(len(hello))}, hello...)
+	return append([]byte{22, byte(version >> 8), byte(version), 0, byte(len(message))}, message...)
+}
+
+// replayConn returns the bytes in read before it reads from Conn.
+type replayConn struct {
+	net.Conn
+	read []byte
+}
+
+func (c *replayConn) Read(p []byte) (int, error) {
+	if len(c.read) > 0 {
+		n := copy(p, c.read)
+		c.read = c.read[n:]
+		return n, nil
+	}
+	return c.Conn.Read(p)
+}
+
+// boolText is b as true or false, or "left out" when b is nil.
+func boolText(b *bool) string {
+	if b == nil {
+		return "left out"
+	}
+	return strconv.FormatBool(*b)
 }
 
 // scanOne scans endpoint as the run's steps do, and returns its result and

@@ -14,8 +14,9 @@ func Spec(version, commit string) componentsdk.CollectorSpec {
 		Version:     version,
 		Commit:      commit,
 		Description: "Collects public TLS certificate and protocol posture",
-		Schemas:     schema.Schemas(),
+		Methods:     schema.Methods(),
 		TraceMap:    schema.TraceMap,
+		Writes:      []string{SchemaID},
 		Timeout:     30 * time.Minute,
 	}
 }

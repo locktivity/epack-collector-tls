@@ -2,6 +2,8 @@ package collector
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"net"
 	"strconv"
 	"testing"
@@ -77,6 +79,128 @@ func TestCollectReadsAClosedPortOrAnUnknownHostAsUnreachable(t *testing.T) {
 	}
 	if len(progressCalls) != 5 {
 		t.Errorf("len(progressCalls) = %d, want 5: each endpoint in both steps, then the end", len(progressCalls))
+	}
+}
+
+// A TLS 1.0-only server written before TLS 1.3 answers the modern handshake
+// with a TLS 1.0 ServerHello. It counts as unreachable over modern TLS in the
+// summary, and nothing is left out.
+func TestCollectSummarizesAServerWrittenBeforeTLS13(t *testing.T) {
+	var dialer net.Dialer
+	rec := &componentsdk.Recorder{}
+	posture := Collect(context.Background(), Config{
+		Endpoints: []Endpoint{preTLS13Server(t, tls.VersionTLS10), preTLS13Server(t, tls.VersionTLS12)},
+		Dial:      dialer.DialContext,
+		Now:       time.Now,
+		Recorder:  rec,
+	})
+
+	s := posture.Summary
+	if got := boolText(s.AllModernProtocol); got != "false" {
+		t.Errorf("AllModernProtocol = %s, want false", got)
+	}
+	for name, got := range map[string]*int{
+		"ReachablePct":               s.ReachablePct,
+		"ModernProtocolPct":          s.ModernProtocolPct,
+		"LegacyProtocolSupportedPct": s.LegacyProtocolSupportedPct,
+	} {
+		switch {
+		case got == nil:
+			t.Errorf("%s left out, want 50", name)
+		case *got != 50:
+			t.Errorf("%s = %d, want 50", name, *got)
+		}
+	}
+	if gaps := rec.Gaps(); len(gaps) != 0 {
+		t.Errorf("gaps = %+v, want none", gaps)
+	}
+}
+
+// A server that requires a client certificate counts toward the versions it
+// sets in its ServerHello, though each handshake without a client certificate
+// fails.
+func TestCollectSummarizesAServerThatRequiresAClientCertificate(t *testing.T) {
+	var dialer net.Dialer
+	rec := &componentsdk.Recorder{}
+	posture := Collect(context.Background(), Config{
+		Endpoints: []Endpoint{
+			tlsServer(t, serverConfig(t, tls.VersionTLS12, tls.VersionTLS12, tls.RequireAnyClientCert)),
+			tlsServer(t, serverConfig(t, tls.VersionTLS10, tls.VersionTLS10, tls.RequireAnyClientCert)),
+		},
+		Dial:     dialer.DialContext,
+		Now:      time.Now,
+		Recorder: rec,
+	})
+
+	s := posture.Summary
+	for name, got := range map[string]*int{
+		"ModernProtocolCount":          s.ModernProtocolCount,
+		"LegacyProtocolSupportedCount": s.LegacyProtocolSupportedCount,
+	} {
+		switch {
+		case got == nil:
+			t.Errorf("%s left out, want 1", name)
+		case *got != 1:
+			t.Errorf("%s = %d, want 1", name, *got)
+		}
+	}
+	for name, got := range map[string]*int{
+		"ModernProtocolPct":          s.ModernProtocolPct,
+		"LegacyProtocolSupportedPct": s.LegacyProtocolSupportedPct,
+	} {
+		switch {
+		case got == nil:
+			t.Errorf("%s left out, want 50", name)
+		case *got != 50:
+			t.Errorf("%s = %d, want 50", name, *got)
+		}
+	}
+	if gaps := rec.Gaps(); len(gaps) != 0 {
+		t.Errorf("gaps = %+v, want none", gaps)
+	}
+}
+
+// A certificate is still valid in the second of its notAfter (RFC 5280
+// section 4.1.2.5). crypto/x509 reads the chain the same way.
+func TestCollectReadsACertificateAsValidAtItsNotAfter(t *testing.T) {
+	config := serverConfig(t, tls.VersionTLS13, tls.VersionTLS13, tls.NoClientCert)
+	leaf, err := x509.ParseCertificate(config.Certificates[0].Certificate[0])
+	if err != nil {
+		t.Fatalf("ParseCertificate returned error: %v", err)
+	}
+	roots := x509.NewCertPool()
+	roots.AddCert(leaf)
+	endpoint := tlsServer(t, config)
+
+	for _, test := range []struct {
+		name  string
+		now   time.Time
+		valid bool
+	}{
+		{"a second before notAfter", leaf.NotAfter.Add(-time.Second), true},
+		{"at notAfter", leaf.NotAfter, true},
+		{"a second after notAfter", leaf.NotAfter.Add(time.Second), false},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			var dialer net.Dialer
+			posture := Collect(context.Background(), Config{
+				Endpoints: []Endpoint{endpoint},
+				Dial:      dialer.DialContext,
+				RootCAs:   roots,
+				Now:       func() time.Time { return test.now },
+				Recorder:  &componentsdk.Recorder{},
+			})
+			assessment := posture.Endpoints[0].Assessment
+			if got := boolText(assessment.Expired); got != strconv.FormatBool(!test.valid) {
+				t.Errorf("Expired = %s, want %v", got, !test.valid)
+			}
+			if got := boolText(assessment.CertificateValid); got != strconv.FormatBool(test.valid) {
+				t.Errorf("CertificateValid = %s, want %v; issues: %v", got, test.valid, assessment.Issues)
+			}
+			if got := boolText(posture.Summary.AllCertificatesValid); got != strconv.FormatBool(test.valid) {
+				t.Errorf("AllCertificatesValid = %s, want %v", got, test.valid)
+			}
+		})
 	}
 }
 

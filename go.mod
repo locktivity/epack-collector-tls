@@ -4,7 +4,7 @@ go 1.26.0
 
 toolchain go1.26.10
 
-require github.com/locktivity/epack v0.9.5
+require github.com/locktivity/epack v0.10.0
 
 require (
 	github.com/aws/smithy-go v1.25.1 // indirect

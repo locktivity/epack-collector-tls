@@ -111,7 +111,7 @@ func kitClean() collectortest.Scenario {
 			"/summary/expiring_soon_count":                      0,
 			"/summary/expiring_soon_pct":                        0,
 			"/summary/legacy_protocol_supported_count":          1,
-			"/summary/legacy_protocol_supported_pct":            16,
+			"/summary/legacy_protocol_supported_pct":            17,
 			"/summary/all_certificates_valid":                   false,
 			"/summary/all_modern_protocol":                      false,
 		}, kitResultPath: kitStepPins()},
@@ -150,7 +150,7 @@ func kitNoneReachable() collectortest.Scenario {
 			"/summary/modern_protocol_count":            0,
 			"/summary/modern_protocol_pct":              0,
 			"/summary/legacy_protocol_supported_count":  2,
-			"/summary/legacy_protocol_supported_pct":    33,
+			"/summary/legacy_protocol_supported_pct":    34,
 			"/summary/all_certificates_valid":           false,
 			"/summary/all_modern_protocol":              false,
 		}},
@@ -190,12 +190,10 @@ func kitClosedPort() collectortest.Scenario {
 				"/summary/all_certificates_valid":           false,
 			},
 			kitResultPath: {
-				"/outcome/status":                         "collected",
-				"/calls/operations/0/name":                handshakeOperation,
-				"/calls/operations/0/calls":               2,
-				"/calls/operations/0/errors/vendor_error": 1,
-				"/calls/operations/1/name":                "tls.probe.tls10",
-				"/calls/operations/1/calls":               1,
+				"/outcome/status":                 "collected",
+				"/calls/operations/0/name":        handshakeOperation,
+				"/calls/operations/0/error_codes": []string{"vendor_error"},
+				"/calls/operations/1/name":        "tls.probe.tls10",
 			},
 		},
 	}
@@ -232,10 +230,10 @@ func kitAllRefused() map[string]map[string]any {
 	return map[string]map[string]any{
 		ArtifactPath: pins,
 		kitResultPath: {
-			"/outcome/status":                         "collected",
-			"/calls/operations/0/name":                handshakeOperation,
-			"/calls/operations/0/errors/vendor_error": len(kitAddresses),
-			"/calls/operations/1":                     collectortest.Absent,
+			"/outcome/status":                 "collected",
+			"/calls/operations/0/name":        handshakeOperation,
+			"/calls/operations/0/error_codes": []string{"vendor_error"},
+			"/calls/operations/1":             collectortest.Absent,
 		},
 	}
 }
