@@ -1,11 +1,17 @@
-// Package schema embeds the JSON Schema of the collector's artifact and its
-// trace map.
+// Package schema embeds the collector's methods for its normalized artifact
+// and its trace map.
 package schema
 
-import _ "embed"
+import (
+	_ "embed"
+	"encoding/json"
+)
 
-//go:embed v1.0.0.json
-var posture []byte
+// methods is methods.json: for each field of the evidencepack/tls@v1 artifact that
+// the collector measures, one plain sentence on how it measures it.
+//
+//go:embed methods.json
+var methods []byte
 
 // TraceMap is the map in trace-map.json, which links each field of the
 // artifact to the handshakes and the code behind it, for
@@ -14,9 +20,13 @@ var posture []byte
 //go:embed trace-map.json
 var TraceMap []byte
 
-// Schemas maps the artifact path to its JSON Schema, for
-// componentsdk.CollectorSpec.Schemas. It is the SDK's evidencepack/tls@v1
-// schema with the annotations the output checks read.
-func Schemas() map[string][]byte {
-	return map[string][]byte{"artifacts/tls.json": posture}
+// Methods returns the sentences in methods.json for
+// componentsdk.CollectorSpec.Methods. The SDK writes each one as the
+// x-epack-method of its field in the SDK's own evidencepack/tls@v1 schema.
+func Methods() map[string]map[string]string {
+	var byField map[string]string
+	if err := json.Unmarshal(methods, &byField); err != nil {
+		panic("docs/schema/methods.json: " + err.Error())
+	}
+	return map[string]map[string]string{"evidencepack/tls@v1": byField}
 }

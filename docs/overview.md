@@ -48,13 +48,13 @@ Certificate verification happens after the handshake, so invalid, expired, or mi
 
 An expired certificate or one for another hostname still reads `trusted_chain: true` when it chains to a trusted root; `expired` and `hostname_valid` report those problems.
 
-Probes offer every cipher suite Go implements, including legacy suites excluded from modern client defaults, so servers that only speak old cipher suites are still detected. A `false` protocol support value means the endpoint turned that version down, with a TLS alert or a reply that is not TLS, or that nothing accepted the connection. A probe that times out or fails another way leaves its value out instead.
+Probes offer every cipher suite Go implements, including legacy suites excluded from modern client defaults, so servers that only speak old cipher suites are still detected. A `false` protocol support value means the endpoint turned that version down or that nothing accepted the connection. The endpoint turns a version down with a handshake_failure or protocol_version alert in reply to the ClientHello, a ServerHello for another version, or a reply that is not TLS. A version the endpoint selects in its ServerHello reads as `true`, even when the handshake then fails because the endpoint requires a client certificate. A probe that times out or fails another way leaves its value out instead.
 
-Summary percentages use all configured endpoints as the denominator. An endpoint that answered without completing a modern handshake, such as one that refuses the connection or speaks plain HTTP, counts against `certificate_valid_pct` and `modern_protocol_pct`. Each percentage has the count it is taken of beside it, such as `certificate_valid_count`, and is that count over `total_endpoints`, rounded down.
+Summary percentages use all configured endpoints as the denominator. An endpoint that answered without completing a modern handshake, such as one that refuses the connection or speaks plain HTTP, counts against `certificate_valid_pct` and `modern_protocol_pct`. Each percentage has the count it is taken of beside it, such as `certificate_valid_count`, and is that count over `total_endpoints`. `expiring_soon_pct` and `legacy_protocol_supported_pct` round up, so one endpoint in either state never shows as 0. The others round down.
 
 ## Partial Collection
 
-A value the collector could not read is left out of `artifacts/tls.json` rather than written as `false` or 0, and a summary count and percentage over it are left out too. The collector result artifact, `artifacts/tls.collector-result.json`, records a gap for each value left out, with the reason and the handshake or probe that failed. It also lists the connections the collector made and the run's two steps. The run fails only when the configuration is invalid.
+A value the collector could not read is left out of `artifacts/tls.tls.json` rather than written as `false` or 0, and a summary count and percentage over it are left out too. The collector result artifact, `artifacts/tls.collector-result.json`, records a gap for each value left out, with the reason and the handshake or probe that failed. It also lists the connections the collector made and the run's two steps. The run fails only when the configuration is invalid.
 
 ## Authentication
 

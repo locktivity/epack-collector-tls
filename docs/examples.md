@@ -177,7 +177,7 @@ Each endpoint includes an `assessment` object:
 
 ### Summary Metrics
 
-All percentages use configured endpoints as the denominator, so an endpoint that answered without completing a modern handshake counts against certificate and protocol percentages. Each percentage has a count beside it, such as `reachable_count`, the number of endpoints it counts, and is that count over `total_endpoints`, rounded down. A count and its percentage are left out when a value behind them could not be read.
+All percentages use configured endpoints as the denominator, so an endpoint that answered without completing a modern handshake counts against certificate and protocol percentages. Each percentage has a count beside it, such as `reachable_count`, the number of endpoints it counts, and is that count over `total_endpoints`. `expiring_soon_pct` and `legacy_protocol_supported_pct` round up, so one endpoint in either state never shows as 0. The others round down. A count and its percentage are left out when a value behind them could not be read.
 
 | Field | Description |
 |-------|-------------|

@@ -76,17 +76,19 @@ func location(pointer string) componentsdk.Location {
 
 // computeSummary rolls the endpoints up. A count or percentage over
 // endpoints with a value left out is left out too, with a partial gap, and so
-// is an every-endpoint flag unless a read value already makes it false.
+// is an every-endpoint flag unless a read value already makes it false. Each
+// percentage rounds as its x-epack-rounding in the schema says. A percentage
+// of endpoints in a good state rounds down, and one in a bad state rounds up.
 func computeSummary(endpoints []EndpointResult, gaps [][]gap, rec *componentsdk.Recorder) Summary {
 	total := len(endpoints)
-	ratio := func(field string, t tally) (*int, *int) {
+	ratio := func(field string, t tally, rounding componentsdk.Rounding) (*int, *int) {
 		rec.Helper()
 		if t.unknown > 0 {
 			rec.Partial(location("/summary/"+field+"_count"), t.unknown, t.err)
 			rec.Partial(location("/summary/"+field+"_pct"), t.unknown, t.err)
 			return nil, nil
 		}
-		return ptr(t.matching), ptr((t.matching * 100) / total)
+		return ptr(t.matching), componentsdk.Percent(t.matching, total, rounding)
 	}
 	every := func(pointer string, t tally) *bool {
 		rec.Helper()
@@ -109,12 +111,12 @@ func computeSummary(endpoints []EndpointResult, gaps [][]gap, rec *componentsdk.
 	legacy := count(endpoints, gaps, "/assessment/legacy_protocol_supported", func(e EndpointResult) *bool { return e.Assessment.LegacyProtocolSupported })
 
 	summary := Summary{TotalEndpoints: total}
-	summary.ReachableCount, summary.ReachablePct = ratio("reachable", reachable)
-	summary.CertificateValidCount, summary.CertificateValidPct = ratio("certificate_valid", certValid)
-	summary.HostnameValidCount, summary.HostnameValidPct = ratio("hostname_valid", hostnameValid)
-	summary.ModernProtocolCount, summary.ModernProtocolPct = ratio("modern_protocol", modern)
-	summary.ExpiringSoonCount, summary.ExpiringSoonPct = ratio("expiring_soon", expiringSoon)
-	summary.LegacyProtocolSupportedCount, summary.LegacyProtocolSupportedPct = ratio("legacy_protocol_supported", legacy)
+	summary.ReachableCount, summary.ReachablePct = ratio("reachable", reachable, componentsdk.RoundDown)
+	summary.CertificateValidCount, summary.CertificateValidPct = ratio("certificate_valid", certValid, componentsdk.RoundDown)
+	summary.HostnameValidCount, summary.HostnameValidPct = ratio("hostname_valid", hostnameValid, componentsdk.RoundDown)
+	summary.ModernProtocolCount, summary.ModernProtocolPct = ratio("modern_protocol", modern, componentsdk.RoundDown)
+	summary.ExpiringSoonCount, summary.ExpiringSoonPct = ratio("expiring_soon", expiringSoon, componentsdk.RoundUp)
+	summary.LegacyProtocolSupportedCount, summary.LegacyProtocolSupportedPct = ratio("legacy_protocol_supported", legacy, componentsdk.RoundUp)
 	summary.AllCertificatesValid = every("/summary/all_certificates_valid", certValid)
 	summary.AllModernProtocol = every("/summary/all_modern_protocol", modern)
 	return summary
