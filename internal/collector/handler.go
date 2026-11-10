@@ -43,6 +43,10 @@ func Run(ctx componentsdk.CollectorContext) error {
 		OnProgress: ctx.Progress,
 	})
 
+	componentsdk.Records(ctx).Targets(componentsdk.TargetEndpoint, location("/endpoints"), "/host", "/port").
+		ChosenBy(componentsdk.ChosenByConfig, "endpoints").
+		Reached("/reachable")
+
 	return ctx.Emit([]componentsdk.CollectedArtifact{
 		componentsdk.JSONArtifact(ArtifactPath, posture, componentsdk.ArtifactMeta{
 			Schema:      SchemaID,
