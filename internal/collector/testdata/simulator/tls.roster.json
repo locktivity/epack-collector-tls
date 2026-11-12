@@ -1,0 +1,183 @@
+{
+  "version": 1,
+  "vendor": "tls",
+  "source": "terraform/main.tf and the nginx server blocks terraform/user_data.sh.tftpl writes, with the certificates checklist.md issues and keeps. The certificate dates, serial numbers, fingerprints and Let's Encrypt's intermediate change at each renewal, so the roster leaves them out and fixes one day inside each expectation's range.",
+  "placeholders": {
+    "SANDBOX_DOMAIN": "example.com"
+  },
+  "tls": {
+    "endpoints": [
+      {
+        "host": "modern.tls.example.com",
+        "port": 443,
+        "accepts": [
+          "TLSv1.2",
+          "TLSv1.3"
+        ],
+        "negotiates": {
+          "version": "TLSv1.3",
+          "cipher_suite": "TLS_AES_256_GCM_SHA384"
+        },
+        "certificate": {
+          "dns_names": [
+            "modern.tls.example.com"
+          ],
+          "public_key_algorithm": "ECDSA",
+          "expires_in_days": 60,
+          "chain": [
+            "modern.tls.example.com",
+            "YE1",
+            "Root YE",
+            "ISRG Root X2"
+          ],
+          "root": "ISRG Root X1"
+        }
+      },
+      {
+        "host": "legacy.tls.example.com",
+        "port": 8443,
+        "accepts": [
+          "TLSv1",
+          "TLSv1.1",
+          "TLSv1.2",
+          "TLSv1.3"
+        ],
+        "negotiates": {
+          "version": "TLSv1.3",
+          "cipher_suite": "TLS_AES_256_GCM_SHA384"
+        },
+        "certificate": {
+          "dns_names": [
+            "legacy.tls.example.com"
+          ],
+          "public_key_algorithm": "ECDSA",
+          "expires_in_days": 60,
+          "chain": [
+            "legacy.tls.example.com",
+            "YE1",
+            "Root YE",
+            "ISRG Root X2"
+          ],
+          "root": "ISRG Root X1"
+        }
+      },
+      {
+        "host": "legacy-only.tls.example.com",
+        "port": 8444,
+        "accepts": [
+          "TLSv1",
+          "TLSv1.1"
+        ],
+        "negotiates": {
+          "version": "TLSv1.1",
+          "cipher_suite": "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA"
+        },
+        "certificate": {
+          "dns_names": [
+            "legacy-only.tls.example.com"
+          ],
+          "public_key_algorithm": "ECDSA",
+          "expires_in_days": 60,
+          "chain": [
+            "legacy-only.tls.example.com",
+            "YE1",
+            "Root YE",
+            "ISRG Root X2"
+          ],
+          "root": "ISRG Root X1"
+        }
+      },
+      {
+        "host": "self-signed.tls.example.com",
+        "port": 443,
+        "accepts": [
+          "TLSv1.2",
+          "TLSv1.3"
+        ],
+        "negotiates": {
+          "version": "TLSv1.3",
+          "cipher_suite": "TLS_AES_256_GCM_SHA384"
+        },
+        "certificate": {
+          "subject_common_name": "self-signed.tls.example.com",
+          "issuer_common_name": "self-signed.tls.example.com",
+          "dns_names": [
+            "self-signed.tls.example.com"
+          ],
+          "public_key_algorithm": "ECDSA",
+          "signature_algorithm": "ECDSA-SHA256",
+          "expires_in_days": 3600,
+          "chain": [
+            "self-signed.tls.example.com"
+          ],
+          "root": "self-signed.tls.example.com"
+        }
+      },
+      {
+        "host": "mismatch.tls.example.com",
+        "port": 443,
+        "accepts": [
+          "TLSv1.2",
+          "TLSv1.3"
+        ],
+        "negotiates": {
+          "version": "TLSv1.3",
+          "cipher_suite": "TLS_AES_256_GCM_SHA384"
+        },
+        "certificate": {
+          "dns_names": [
+            "modern.tls.example.com"
+          ],
+          "public_key_algorithm": "ECDSA",
+          "expires_in_days": 60,
+          "chain": [
+            "modern.tls.example.com",
+            "YE1",
+            "Root YE",
+            "ISRG Root X2"
+          ],
+          "root": "ISRG Root X1"
+        }
+      },
+      {
+        "host": "expired.tls.example.com",
+        "port": 443,
+        "accepts": [
+          "TLSv1.2",
+          "TLSv1.3"
+        ],
+        "negotiates": {
+          "version": "TLSv1.3",
+          "cipher_suite": "TLS_AES_256_GCM_SHA384"
+        },
+        "certificate": {
+          "dns_names": [
+            "expired.tls.example.com"
+          ],
+          "public_key_algorithm": "ECDSA",
+          "expires_in_days": -14,
+          "chain": [
+            "expired.tls.example.com",
+            "YE1",
+            "Root YE",
+            "ISRG Root X2"
+          ],
+          "root": "ISRG Root X1"
+        }
+      }
+    ]
+  },
+  "terms": {
+    "tls_versions": {
+      "TLSv1": "tls_1_0",
+      "TLSv1.1": "tls_1_1",
+      "TLSv1.2": "tls_1_2",
+      "TLSv1.3": "tls_1_3"
+    },
+    "tls_roots": {
+      "ISRG Root X1": "trusted",
+      "self-signed.tls.example.com": "untrusted"
+    }
+  }
+}
+
