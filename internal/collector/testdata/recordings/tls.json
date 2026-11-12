@@ -1,0 +1,92 @@
+{
+  "name": "tls",
+  "recorded_at": "2026-11-12T20:58:22Z",
+  "collector": "tls",
+  "collector_version": "record",
+  "config": {
+    "endpoints": [
+      "modern.tls.example.com",
+      "legacy.tls.example.com:8443",
+      "legacy-only.tls.example.com:8444",
+      "self-signed.tls.example.com",
+      "mismatch.tls.example.com",
+      "expired.tls.example.com"
+    ],
+    "level": "audit"
+  },
+  "endpoints": [
+    {
+      "address": "modern.tls.example.com:443",
+      "min_version": "TLS 1.2",
+      "max_version": "TLS 1.3",
+      "cert": {
+        "dns_names": [
+          "modern.tls.example.com"
+        ],
+        "not_before": "2026-10-22T13:40:29Z",
+        "not_after": "2027-01-20T13:40:28Z"
+      }
+    },
+    {
+      "address": "legacy.tls.example.com:8443",
+      "min_version": "TLS 1.0",
+      "max_version": "TLS 1.3",
+      "cert": {
+        "dns_names": [
+          "legacy.tls.example.com"
+        ],
+        "not_before": "2026-10-22T13:41:02Z",
+        "not_after": "2027-01-20T13:41:01Z"
+      }
+    },
+    {
+      "address": "legacy-only.tls.example.com:8444",
+      "min_version": "TLS 1.0",
+      "max_version": "TLS 1.1",
+      "cert": {
+        "dns_names": [
+          "legacy-only.tls.example.com"
+        ],
+        "not_before": "2026-10-22T13:41:35Z",
+        "not_after": "2027-01-20T13:41:34Z"
+      }
+    },
+    {
+      "address": "self-signed.tls.example.com:443",
+      "min_version": "TLS 1.2",
+      "max_version": "TLS 1.3",
+      "cert": {
+        "dns_names": [
+          "self-signed.tls.example.com"
+        ],
+        "not_before": "2026-10-22T14:38:20Z",
+        "not_after": "2036-10-19T14:38:20Z",
+        "untrusted": true
+      }
+    },
+    {
+      "address": "mismatch.tls.example.com:443",
+      "min_version": "TLS 1.2",
+      "max_version": "TLS 1.3",
+      "cert": {
+        "dns_names": [
+          "modern.tls.example.com"
+        ],
+        "not_before": "2026-10-22T13:40:29Z",
+        "not_after": "2027-01-20T13:40:28Z"
+      }
+    },
+    {
+      "address": "expired.tls.example.com:443",
+      "min_version": "TLS 1.2",
+      "max_version": "TLS 1.3",
+      "cert": {
+        "dns_names": [
+          "expired.tls.example.com"
+        ],
+        "not_before": "2026-10-22T13:42:48Z",
+        "not_after": "2026-10-29T05:42:47Z"
+      }
+    }
+  ]
+}
