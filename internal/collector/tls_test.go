@@ -202,6 +202,43 @@ func TestAssessNotYetValidCertificate(t *testing.T) {
 	}
 }
 
+func TestDaysUntilRoundsDown(t *testing.T) {
+	now := time.Date(2026, 1, 1, 12, 0, 0, 500, time.UTC)
+	for _, test := range []struct {
+		name string
+		t    time.Time
+		days int
+	}{
+		{"60 and a half days away", now.Add(60*24*time.Hour + 12*time.Hour), 60},
+		{"half a day away", now.Add(12 * time.Hour), 0},
+		{"now", now, 0},
+		{"a nanosecond ago", now.Add(-time.Nanosecond), -1},
+		{"half a day ago", now.Add(-12 * time.Hour), -1},
+		{"exactly a day ago", now.Add(-24 * time.Hour), -1},
+		{"13 and a half days ago", now.Add(-13*24*time.Hour - 12*time.Hour), -14},
+		{"the year 9999", time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC), 2912442},
+	} {
+		if got := daysUntil(now, test.t); got != test.days {
+			t.Errorf("%s: daysUntil = %d, want %d", test.name, got, test.days)
+		}
+	}
+}
+
+// A certificate with 30 whole days left has at least 30 days to go, so it
+// isn't within the 30 days expiring_soon counts.
+func TestAssessExpiringSoonIsUnder30Days(t *testing.T) {
+	for days, soon := range map[int]bool{31: false, 30: false, 29: true, 0: true} {
+		assessment := assess(EndpointResult{
+			Reachable:   ptr(true),
+			TLS:         &TLSDetails{ProtocolSupport: ProtocolSupport{TLS12: ptr(true), TLS13: ptr(true)}},
+			Certificate: &Certificate{NotAfter: time.Now().Add(time.Duration(days)*24*time.Hour + time.Hour), ExpiresInDays: days, TrustedChain: true, HostnameValid: true},
+		}, time.Now())
+		if got := boolText(assessment.ExpiringSoon); got != strconv.FormatBool(soon) {
+			t.Errorf("%d days left: ExpiringSoon = %s, want %v", days, got, soon)
+		}
+	}
+}
+
 // A certificate is valid from notBefore through notAfter, inclusive (RFC 5280
 // section 4.1.2.5).
 func TestAssessCertificateValidityPeriodIncludesItsEnds(t *testing.T) {

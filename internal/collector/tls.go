@@ -302,23 +302,22 @@ func summarizeCertificate(host string, chain []*x509.Certificate, roots *x509.Ce
 	return cert
 }
 
-// daysUntil is the number of whole days from now to t, rounded toward zero.
-// It counts in seconds because a time.Duration holds at most about 292 years.
+// daysUntil is the number of whole days from now to t, rounded down, so it
+// is negative once t has passed, as the schema has expires_in_days. It
+// counts in seconds because a time.Duration holds at most about 292 years.
 // A certificate with no fixed expiry has a not_after in the year 9999
 // (RFC 5280 section 4.1.2.5).
 func daysUntil(now, t time.Time) int {
 	seconds := t.Unix() - now.Unix()
-	// When the seconds and the fraction of a second differ in sign, one second
-	// moves across so they match. The division then rounds the whole
-	// difference toward zero.
-	nanos := t.Nanosecond() - now.Nanosecond()
-	switch {
-	case seconds > 0 && nanos < 0:
+	if t.Nanosecond() < now.Nanosecond() {
 		seconds--
-	case seconds < 0 && nanos > 0:
-		seconds++
 	}
-	return int(seconds / (24 * 60 * 60))
+	const day = 24 * 60 * 60
+	days := seconds / day
+	if seconds%day < 0 {
+		days--
+	}
+	return int(days)
 }
 
 // signatureAlgorithm names the algorithm the issuer signed cert with. An
@@ -387,7 +386,7 @@ func assess(result EndpointResult, now time.Time) Assessment {
 		certificate := *result.Certificate
 		notYetValid := certificate.NotBefore.After(now)
 		expired := certificateExpired(certificate, now)
-		expiringSoon := !expired && certificate.ExpiresInDays <= expiringSoonDays
+		expiringSoon := !expired && certificate.ExpiresInDays < expiringSoonDays
 		assessment.HostnameValid = ptr(certificate.HostnameValid)
 		assessment.Expired = ptr(expired)
 		assessment.ExpiringSoon = ptr(expiringSoon)
